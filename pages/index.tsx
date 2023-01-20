@@ -17,6 +17,7 @@ const postMsg = async (data: any, chanel: string, event: string) => {
 
 export default function Home() {
   const [msg, setMsg] = useState('')
+  const [connectedUsers, setConnectedUsers] = useState<string[]>([])
   const [currentCard, setCurrentCard] = useState(undefined)
   const [userName, setUserName] = useState(undefined)
 
@@ -25,8 +26,8 @@ export default function Home() {
       cluster: 'eu'
     })
     const c = p.subscribe('id-room');
-    c.bind('user-connected', (data: any) => {
-      setMsg(JSON.stringify(data))
+    c.bind('user-connected', ({user}: {user: string}) => {
+      setConnectedUsers((users) => [...users, user])
     })
     c.bind('card-choosen', (data: any) => {
       setMsg(JSON.stringify(data))
@@ -61,7 +62,9 @@ export default function Home() {
       
       {userName && 
         <div>
-          
+          {connectedUsers.map((user, i) => 
+            <div key={i}>{user}</div>
+          )}
           <div>
             {[1, 2, 3, 5, 8, 13, 20, 40, 100, '☕️', '♾️'].map((value) => 
               <button key={value} onClick={handleChooseValue} value={value}>{value}</button>
