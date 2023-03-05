@@ -1,8 +1,18 @@
 import Card from "@/models/card.model"
+import User from "@/models/user.model"
 import { postMsg } from "@/utils/pusher.utils"
 import { useRouter } from "next/router"
 import Pusher from "pusher-js"
 import { useEffect, useState } from "react"
+import { v4 as uuidv4 } from 'uuid'
+
+const postCardChoosen = (card: number, user: User, idRoom: string) => {
+    return postMsg({ cardValue: card, user }, idRoom, 'card-choosen')
+}
+
+const postUserConnected = (user: User, idRoom: string) => {
+    return postMsg({ user }, idRoom, 'user-connected')
+}
 
 export default function Room() {
     const router = useRouter()
@@ -10,21 +20,22 @@ export default function Room() {
     const idRoom = `${routeName}_${id}`
     const [currentCard, setCurrentCard] = useState<number>()
     const [cards, setCards] = useState<Card[]>([])
-    const [connectedUsers, setConnectedUsers] = useState<string[]>([])
-    const [userName, setUserName] = useState(undefined)
+    const [connectedUsers, setConnectedUsers] = useState<User[]>([])
+    const [currentUser, setCurrentUser] = useState<User>()
 
     const handleChooseValue = async (e: any) => {
-        if (!idRoom || Array.isArray(idRoom)) return
+        if (!idRoom || Array.isArray(idRoom) || !currentUser) return
         const card = e.target.value
         setCurrentCard(card)
-        postMsg({ cardValue: card, user: userName }, idRoom, 'card-choosen')
+        postCardChoosen(card, currentUser, idRoom)
     }
 
     const handleNameSubmitted = (e: any) => {
         if (!idRoom || Array.isArray(idRoom)) return
         e.preventDefault()
-        setUserName(e.target.name.value)
-        postMsg({ user: e.target.name.value }, idRoom, 'user-connected')
+        const newUser = { name: e.target.name.value, id: uuidv4()}
+        setCurrentUser(newUser)
+        postUserConnected(newUser, idRoom)
     }
 
     useEffect(() => {
@@ -35,10 +46,10 @@ export default function Room() {
         })
         const chanel = pusher.subscribe(idRoom);
         chanel.bind('card-choosen', (data: Card) => {
-            console.log('card-choosen', data)
+            console.log('card-choosen event', data)
             setCards((oldCards) => {
                 const newCards = [...oldCards]
-                const index = newCards.findIndex((c) => c.user === data.user)
+                const index = newCards.findIndex((c) => c.user.id === data.user.id)
                 if (index === -1) {
                     newCards.push(data)
                 } else {
@@ -47,15 +58,15 @@ export default function Room() {
                 return newCards
             })
         })
-        chanel.bind('user-connected', ({ user }: { user: string }) => {
-            console.log('user-connected', user)
+        chanel.bind('user-connected', ({ user }: { user: User }) => {
+            console.log('user-connected event', user)
             // first, we add the new user to the list of connected users
-            if (!connectedUsers.find(u => u === user)) {
+            if (!connectedUsers.find(u => u.id === user.id)) {
                 setConnectedUsers((users) => [...users, user])
                 // then, we send a message to the new user to tell him we are connected & our card choose
-                if (user !== userName) {
-                    postMsg({ user: userName }, idRoom, 'user-connected')
-                    currentCard && postMsg({ cardValue: currentCard, user: userName }, idRoom, 'card-choosen')
+                if (currentUser && user.id !== currentUser.id) {
+                    postUserConnected(currentUser, idRoom)
+                    currentCard && postCardChoosen(currentCard, currentUser, idRoom)
                 }
             }
         })
@@ -69,12 +80,12 @@ export default function Room() {
     return (
         <div>
             <h1>{routeName}</h1>
-            <h2>{userName}</h2>
+            <h2>{currentUser?.name}</h2>
             <a onClick={() => navigator.clipboard.writeText(window.location.href)}>Inviter des joueurs</a>
             {cards.map((card) =>
-                <div key={card.user}>{card.user} a choisi {card.cardValue}</div>
+                <div key={card.user.id}>{card.user.name} a choisi {card.cardValue}</div>
             )}
-            {!userName && 
+            {!currentUser && 
                 <form onSubmit={handleNameSubmitted}>
                     <label>Saisissez votre nom d&apos;utilisateur</label>
                     <input name='name'></input>
@@ -82,11 +93,11 @@ export default function Room() {
                 </form>
             }
             
-            {userName && 
+            {currentUser && 
                 <div>
                     Utilisateurs connectés :
                     {connectedUsers.map((user) => 
-                        <div key={user}>{user}</div>
+                        <div key={user.id}>{user.name}</div>
                     )}
                     <div>
                         {[1, 2, 3, 5, 8, 13, 20, 40, 100, '☕️', '♾️'].map((value) => 
