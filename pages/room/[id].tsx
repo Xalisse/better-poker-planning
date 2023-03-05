@@ -70,6 +70,7 @@ export default function Room() {
         <div>
             <h1>{routeName}</h1>
             <h2>{userName}</h2>
+            <a onClick={() => navigator.clipboard.writeText(window.location.href)}>Inviter des joueurs</a>
             {cards.map((card) =>
                 <div key={card.user}>{card.user} a choisi {card.cardValue}</div>
             )}
