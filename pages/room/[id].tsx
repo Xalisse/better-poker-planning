@@ -30,16 +30,22 @@ export default function Room() {
         postCardChoosen(card, currentUser, idRoom)
     }
 
-    const handleNameSubmitted = (e: any) => {
+    const handleCreateUser = (e: any) => {
         if (!idRoom || Array.isArray(idRoom)) return
         e.preventDefault()
         const newUser = { name: e.target.name.value, id: uuidv4()}
         setCurrentUser(newUser)
         postUserConnected(newUser, idRoom)
+        localStorage.setItem('currentUser', JSON.stringify(newUser))
     }
 
     useEffect(() => {
         if (!idRoom || Array.isArray(idRoom)) return
+        const localUser = localStorage.getItem('currentUser')
+        if (localUser) {
+            setCurrentUser(JSON.parse(localUser))
+        }
+
         const pusher = new Pusher('36a15d9047517284e838', {
             cluster: 'eu',
             userAuthentication: { endpoint: '/api/join-planning', transport: 'jsonp' }
@@ -86,7 +92,7 @@ export default function Room() {
                 <div key={card.user.id}>{card.user.name} a choisi {card.cardValue}</div>
             )}
             {!currentUser && 
-                <form onSubmit={handleNameSubmitted}>
+                <form onSubmit={handleCreateUser}>
                     <label>Saisissez votre nom d&apos;utilisateur</label>
                     <input name='name'></input>
                     <button type='submit'>Valider</button>
