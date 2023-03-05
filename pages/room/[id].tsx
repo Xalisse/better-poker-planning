@@ -86,7 +86,7 @@ export default function Room() {
     return (
         <div>
             <h1>{routeName}</h1>
-            <h2>{currentUser?.name}</h2>
+            <h2>Connecté en tant que <strong>{currentUser?.name}</strong></h2>
             <a onClick={() => navigator.clipboard.writeText(window.location.href)}>Inviter des joueurs</a>
             {cards.map((card) =>
                 <div key={card.user.id}>{card.user.name} a choisi {card.cardValue}</div>
@@ -107,7 +107,7 @@ export default function Room() {
                     )}
                     <div>
                         {[1, 2, 3, 5, 8, 13, 20, 40, 100, '☕️', '♾️'].map((value) => 
-                        <button key={value} onClick={handleChooseValue} value={value}>{value}</button>
+                            <button key={value} onClick={handleChooseValue} value={value}>{value}</button>
                         )}
                     </div>
                     <div>
