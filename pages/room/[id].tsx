@@ -6,8 +6,8 @@ import { useEffect, useState } from "react"
 
 export default function Room() {
     const router = useRouter()
-    const { id } = router.query
-    const idRoom = `room-${id}`
+    const { id, routeName } = router.query
+    const idRoom = `${routeName}_${id}`
     const [currentCard, setCurrentCard] = useState<number>()
     const [cards, setCards] = useState<Card[]>([])
     const [connectedUsers, setConnectedUsers] = useState<string[]>([])
@@ -68,7 +68,7 @@ export default function Room() {
 
     return (
         <div>
-            <h1>Room {idRoom}</h1>
+            <h1>{routeName}</h1>
             <h2>{userName}</h2>
             {cards.map((card) =>
                 <div key={card.user}>{card.user} a choisi {card.cardValue}</div>
