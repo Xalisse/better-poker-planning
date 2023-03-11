@@ -1,8 +1,8 @@
 import User from "./user.model"
 
-interface Card {
+interface CardInterface {
   cardValue: number
   user: User
 }
 
-export default Card
+export default CardInterface

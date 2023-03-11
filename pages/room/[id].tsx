@@ -1,4 +1,5 @@
-import Card from "@/models/card.model"
+import Card from "@/components/Card"
+import CardInterface from "@/models/card.model"
 import User from "@/models/user.model"
 import { postMsg } from "@/utils/pusher.utils"
 import { useRouter } from "next/router"
@@ -6,7 +7,7 @@ import Pusher from "pusher-js"
 import { useEffect, useState } from "react"
 import { v4 as uuidv4 } from 'uuid'
 
-const postCardChoosen = (card: number, user: User, idRoom: string) => {
+const postCardChoosen = (card: number | string, user: User, idRoom: string) => {
     return postMsg({ cardValue: card, user }, idRoom, 'card-choosen')
 }
 
@@ -18,14 +19,13 @@ export default function Room() {
     const router = useRouter()
     const { id, routeName } = router.query
     const idRoom = `${routeName}_${id}`
-    const [currentCard, setCurrentCard] = useState<number>()
-    const [cards, setCards] = useState<Card[]>([])
+    const [currentCard, setCurrentCard] = useState<number | string>()
+    const [cards, setCards] = useState<CardInterface[]>([])
     const [connectedUsers, setConnectedUsers] = useState<User[]>([])
     const [currentUser, setCurrentUser] = useState<User>()
 
-    const handleChooseValue = async (e: any) => {
+    const handleChooseValue = async (card: string | number) => {
         if (!idRoom || Array.isArray(idRoom) || !currentUser) return
-        const card = e.target.value
         setCurrentCard(card)
         postCardChoosen(card, currentUser, idRoom)
     }
@@ -51,7 +51,7 @@ export default function Room() {
             userAuthentication: { endpoint: '/api/join-planning', transport: 'jsonp' }
         })
         const chanel = pusher.subscribe(idRoom);
-        chanel.bind('card-choosen', (data: Card) => {
+        chanel.bind('card-choosen', (data: CardInterface) => {
             console.log('card-choosen event', data)
             setCards((oldCards) => {
                 const newCards = [...oldCards]
@@ -86,7 +86,6 @@ export default function Room() {
     return (
         <div>
             <h1>{routeName}</h1>
-            <h2>Connecté en tant que <strong>{currentUser?.name}</strong></h2>
             <a onClick={() => navigator.clipboard.writeText(window.location.href)}>Inviter des joueurs</a>
             {cards.map((card) =>
                 <div key={card.user.id}>{card.user.name} a choisi {card.cardValue}</div>
@@ -105,13 +104,11 @@ export default function Room() {
                     {connectedUsers.map((user) => 
                         <div key={user.id}>{user.name}</div>
                     )}
-                    <div>
+                    <p>Choisis une carte</p>
+                    <div className="flex justify-around max-w-4xl m-auto">
                         {[1, 2, 3, 5, 8, 13, 20, 40, 100, '☕️', '♾️'].map((value) => 
-                            <button key={value} onClick={handleChooseValue} value={value}>{value}</button>
+                            <Card value={value} onClick={() => handleChooseValue(value)} isSelected={value === currentCard} key={value}/>
                         )}
-                    </div>
-                    <div>
-                        Ma carte: {currentCard}
                     </div>
                 </div>
             }
