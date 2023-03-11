@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    height: 100vh;
+    text-align: center;
+}
+#__next {
+    height: 100%;
+}
+
+@layer base {
+    body {
+        @apply bg-light
+    }
+
+    h1 {
+        @apply text-4xl text-center;
+    }
+
+    input {
+        @apply border-2 rounded-lg p-2;
+    }
+
+    button {
+        @apply !bg-pink text-light rounded-full py-2 px-5 hover:cursor-pointer;
+    }
+}

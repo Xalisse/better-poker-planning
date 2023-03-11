@@ -12,11 +12,11 @@ export default function Home() {
     }
 
     return (
-        <main>
-            <h1>Better Poker planning</h1>
+        <main className='h-full pt-6'>
+            <h1 className='mb-44'>Better Poker planning</h1>
             <form onSubmit={handleNewRoom}>
                 <input name='name' onChange={(e) => setRoomName(e.target.value)} placeholder='Nom de la salle'></input>
-                <button type='submit' disabled={!roomName}>Créer une salle</button>
+                <button type='submit' disabled={!roomName}>jouer</button>
             </form>
         </main>
     )
