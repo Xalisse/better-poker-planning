@@ -1,4 +1,5 @@
 import Card from "@/components/Card"
+import UserCard from "@/components/UserCard"
 import CardInterface from "@/models/card.model"
 import User from "@/models/user.model"
 import { postMsg } from "@/utils/pusher.utils"
@@ -6,6 +7,8 @@ import { useRouter } from "next/router"
 import Pusher from "pusher-js"
 import { useEffect, useState } from "react"
 import { v4 as uuidv4 } from 'uuid'
+
+type CardValueType = number | string | undefined
 
 const postCardChoosen = (card: number | string, user: User, idRoom: string) => {
     return postMsg({ cardValue: card, user }, idRoom, 'card-choosen')
@@ -21,8 +24,20 @@ export default function Room() {
     const idRoom = `${routeName}_${id}`
     const [currentCard, setCurrentCard] = useState<number | string>()
     const [cards, setCards] = useState<CardInterface[]>([])
-    const [connectedUsers, setConnectedUsers] = useState<User[]>([{ name: 'moi', id: '1' }, { name: 'toi', id: '2' }, { name: 'lui', id: '3' }, ])
+    const [connectedUsers, setConnectedUsers] = useState<User[]>([])
     const [currentUser, setCurrentUser] = useState<User>()
+    const [isFlipped, setIsFlipped] = useState<boolean>(false)
+
+    const northUser: { user: User, cardValue: CardValueType }[] = []
+    const eastUser: { user: User, cardValue: CardValueType }[] = []
+    const westUser: { user: User, cardValue: CardValueType }[] = []
+    const southUser: { user: User, cardValue: CardValueType }[] = []
+    connectedUsers.forEach((user, index) => {
+        index % 4 === 0 && southUser.push({user, cardValue: cards.find(c => c.user.id === user.id)?.cardValue})
+        index % 4 === 1 && northUser.push({user, cardValue: cards.find(c => c.user.id === user.id)?.cardValue})
+        index % 4 === 2 && westUser.push({user, cardValue: cards.find(c => c.user.id === user.id)?.cardValue})
+        index % 4 === 3 && eastUser.push({user, cardValue: cards.find(c => c.user.id === user.id)?.cardValue})
+    })
 
     const handleChooseValue = async (card: string | number) => {
         if (!idRoom || Array.isArray(idRoom) || !currentUser) return
@@ -44,6 +59,7 @@ export default function Room() {
         const localUser = localStorage.getItem('currentUser')
         if (localUser) {
             setCurrentUser(JSON.parse(localUser))
+            postUserConnected(JSON.parse(localUser), idRoom)
         }
 
         const pusher = new Pusher('36a15d9047517284e838', {
@@ -98,21 +114,15 @@ export default function Room() {
             
             {currentUser && 
                 <>
-                    <div>
-                        <div className='bg-light-pink w-96 h-52 m-auto flex items-center justify-center rounded-xl'>
-                            <button>Retourner les cartes</button>
+                    <div className="grid grid-cols-[1fr,4fr,1fr] grid-rows-[1fr,4fr,1fr] gap-4 w-2/3 self-center items-center">
+                        <div className='bg-light-pink w-96 h-52 m-auto flex items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
+                            <button onClick={() => setIsFlipped(old => !old)}>Retourner les cartes</button>
                         </div>
-                        {/* {cards.map((card) =>
-                            <div key={card.user.id}>{card.user.name} a choisi {card.cardValue}</div>
-                        )} */}
-                        {/* {connectedUsers.map((user) => 
-                            <div key={user.id}>{user.name}</div>
-                        )} */}
+                        <div className="col-start-2">{northUser.map(({user, cardValue}) => <UserCard key={user.id} user={user} cardValue={cardValue} isFlipped={isFlipped} />)}</div>
+                        <div className="col-start-3 row-start-2">{eastUser.map(({user, cardValue}) => <UserCard key={user.id} user={user} cardValue={cardValue} isFlipped={isFlipped} />)}</div>
+                        <div className="col-start-2 row-start-3">{southUser.map(({user, cardValue}) => <UserCard key={user.id} user={user} cardValue={cardValue} isFlipped={isFlipped} />)}</div>
+                        <div className="col-start-1 row-start-2">{westUser.map(({user, cardValue}) => <UserCard key={user.id} user={user} cardValue={cardValue} isFlipped={isFlipped} />)}</div>
                     </div>
-                    {/* Utilisateurs connectés :
-                    {connectedUsers.map((user) => 
-                        <div key={user.id}>{user.name}</div>
-                    )} */}
                     <div>
                         <p className="my-2">Choisis une carte</p>
                         <div className="flex justify-around max-w-4xl m-auto">
