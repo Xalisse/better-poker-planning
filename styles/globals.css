@@ -12,7 +12,7 @@ body {
 
 @layer base {
     body {
-        @apply bg-light
+        @apply bg-light-lilac
     }
 
     h1 {
@@ -24,6 +24,6 @@ body {
     }
 
     button {
-        @apply !bg-pink text-light rounded-full py-2 px-5 hover:cursor-pointer;
+        @apply !bg-pink text-light rounded-lg py-2 px-5 hover:cursor-pointer;
     }
 }

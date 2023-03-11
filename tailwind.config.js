@@ -9,9 +9,11 @@ module.exports = {
     colors: {
       'blue': '#232946',
       'light': '#fffffe',
+      'light-lilac': '#f5f6fc',
       'lilac': '#d4d8f0',
       'dark-lilac': '#b8c1ec',
       'pink': '#eebbc3',
+      'light-pink': '#ffe3e7',
       'dark-blue': '#121629'
     },
     extend: {

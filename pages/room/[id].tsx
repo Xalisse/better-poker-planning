@@ -21,7 +21,7 @@ export default function Room() {
     const idRoom = `${routeName}_${id}`
     const [currentCard, setCurrentCard] = useState<number | string>()
     const [cards, setCards] = useState<CardInterface[]>([])
-    const [connectedUsers, setConnectedUsers] = useState<User[]>([])
+    const [connectedUsers, setConnectedUsers] = useState<User[]>([{ name: 'moi', id: '1' }, { name: 'toi', id: '2' }, { name: 'lui', id: '3' }, ])
     const [currentUser, setCurrentUser] = useState<User>()
 
     const handleChooseValue = async (card: string | number) => {
@@ -84,12 +84,10 @@ export default function Room() {
     }, [idRoom])
 
     return (
-        <div>
+        <div className="h-full flex flex-col justify-between pb-8">
             <h1>{routeName}</h1>
-            <a onClick={() => navigator.clipboard.writeText(window.location.href)}>Inviter des joueurs</a>
-            {cards.map((card) =>
-                <div key={card.user.id}>{card.user.name} a choisi {card.cardValue}</div>
-            )}
+            {/* <a onClick={() => navigator.clipboard.writeText(window.location.href)}>Inviter des joueurs</a> */}
+            
             {!currentUser && 
                 <form onSubmit={handleCreateUser}>
                     <label>Saisissez votre nom d&apos;utilisateur</label>
@@ -99,18 +97,31 @@ export default function Room() {
             }
             
             {currentUser && 
-                <div>
-                    Utilisateurs connectés :
+                <>
+                    <div>
+                        <div className='bg-light-pink w-96 h-52 m-auto flex items-center justify-center rounded-xl'>
+                            <button>Retourner les cartes</button>
+                        </div>
+                        {/* {cards.map((card) =>
+                            <div key={card.user.id}>{card.user.name} a choisi {card.cardValue}</div>
+                        )} */}
+                        {/* {connectedUsers.map((user) => 
+                            <div key={user.id}>{user.name}</div>
+                        )} */}
+                    </div>
+                    {/* Utilisateurs connectés :
                     {connectedUsers.map((user) => 
                         <div key={user.id}>{user.name}</div>
-                    )}
-                    <p>Choisis une carte</p>
-                    <div className="flex justify-around max-w-4xl m-auto">
-                        {[1, 2, 3, 5, 8, 13, 20, 40, 100, '☕️', '♾️'].map((value) => 
-                            <Card value={value} onClick={() => handleChooseValue(value)} isSelected={value === currentCard} key={value}/>
-                        )}
+                    )} */}
+                    <div>
+                        <p className="my-2">Choisis une carte</p>
+                        <div className="flex justify-around max-w-4xl m-auto">
+                            {[1, 2, 3, 5, 8, 13, 20, 40, 100, '☕️', '♾️'].map((value) => 
+                                <Card value={value} onClick={() => handleChooseValue(value)} isSelected={value === currentCard} key={value}/>
+                            )}
+                        </div>
                     </div>
-                </div>
+                </>
             }
         </div>
     )
