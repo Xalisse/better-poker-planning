@@ -1,4 +1,5 @@
 const postMsg = async (data: any, chanel: string, event: string) => {
+  console.log('pushing data', data, chanel, event)
   const res = await fetch('/api/channels-event', {
     method: 'POST',
     headers: {
