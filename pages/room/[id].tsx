@@ -51,7 +51,6 @@ export default function Room() {
         if (!currentUser) return
         setCurrentCard(card)
         postCardChoosen(card, currentUser, idRoom)
-        localStorage.setItem('currentCard', JSON.stringify(card))
     }
 
     const handleCreateUser = (e: any) => {
@@ -60,13 +59,11 @@ export default function Room() {
         setCurrentUser(newUser)
         setConnectedUsers((users) => [...users, newUser])
         postUserConnected(newUser, idRoom)
-        localStorage.setItem('currentUser', JSON.stringify(newUser))
     }
 
     const handleFlipCards = () => {
         setIsFlipped(!isFlipped)
         postFlipCards(!isFlipped, idRoom)
-        localStorage.setItem('isFlipped', JSON.stringify(!isFlipped))
     }
 
     useEffect(() => {
@@ -81,6 +78,26 @@ export default function Room() {
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
+    useEffect(() => {
+        connectedUsers && localStorage.setItem('connectedUsers', JSON.stringify(connectedUsers))
+    }, [connectedUsers])
+
+    useEffect(() => {
+        cards && localStorage.setItem('cards', JSON.stringify(cards))
+    }, [cards])
+
+    useEffect(() => {
+        localStorage.setItem('isFlipped', JSON.stringify(isFlipped))
+    }, [isFlipped])
+
+    useEffect(() => {
+        currentUser && localStorage.setItem('currentUser', JSON.stringify(currentUser))
+    }, [currentUser])
+
+    useEffect(() => {
+        currentCard && localStorage.setItem('currentCard', JSON.stringify(currentCard))
+    }, [currentCard])
 
     useEffect(() => {
         if(!id || Array.isArray(id)) return
@@ -121,7 +138,6 @@ export default function Room() {
                 } else {
                     newCards[index] = data
                 }
-                localStorage.setItem('cards', JSON.stringify(newCards))
                 return newCards
             })
         })
@@ -130,7 +146,6 @@ export default function Room() {
             // first, we add the new user to the list of connected users
             if (!connectedUsersRef.current.find(u => u.id === user.id)) {
                 setConnectedUsers((users) => [...users, user])
-                localStorage.setItem('connectedUsers', JSON.stringify([...connectedUsersRef.current, user]))
                 // then, we send a message to the new user to tell him we are connected & our choosen card
                 if (currentUserRef.current && user.id !== currentUserRef.current.id) {
                     postUserConnected(currentUserRef.current, idRoom)
@@ -140,7 +155,6 @@ export default function Room() {
         })
         chanel.bind('cards-flipped', ({ flipped }: { flipped: boolean }) => {
             setIsFlipped(flipped)
-            localStorage.setItem('isFlipped', JSON.stringify(flipped))
         })
         setPusher(newPusher)
     // eslint-disable-next-line react-hooks/exhaustive-deps
