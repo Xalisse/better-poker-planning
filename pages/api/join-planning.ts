@@ -1,7 +1,6 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import * as Pusher from "pusher"
-import { v4 as uuidv4 } from 'uuid'
 
 export default async function handler(
   request: NextApiRequest,
@@ -18,10 +17,9 @@ export default async function handler(
 
     // Replace this with code to retrieve the actual user id and info
     const user = {
-        id: uuidv4(),
-        userName: request.body.username,
+        id: request.body.id,
+        userName: request.body.name,
     };
     const auth = pusher.authenticateUser(socketId, user)
-    console.log(auth)
     response.send(auth)
 }

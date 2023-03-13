@@ -5,7 +5,7 @@ import User from "@/models/user.model"
 import { postMsg } from "@/utils/pusher.utils"
 import { useRouter } from "next/router"
 import Pusher from "pusher-js"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { v4 as uuidv4 } from 'uuid'
 
 type CardValueType = number | string | undefined
@@ -15,6 +15,7 @@ const postCardChoosen = (card: number | string, user: User, idRoom: string) => {
 }
 
 const postUserConnected = (user: User, idRoom: string) => {
+    console.log('postUserConnected', new Date().toISOString())
     return postMsg({ user }, idRoom, 'user-connected')
 }
 
@@ -27,6 +28,7 @@ export default function Room() {
     const [connectedUsers, setConnectedUsers] = useState<User[]>([])
     const [currentUser, setCurrentUser] = useState<User>()
     const [isFlipped, setIsFlipped] = useState<boolean>(false)
+    const [pusher, setPusher] = useState<Pusher>()
 
     const northUser: { user: User, cardValue: CardValueType }[] = []
     const eastUser: { user: User, cardValue: CardValueType }[] = []
@@ -39,34 +41,58 @@ export default function Room() {
         index % 4 === 3 && eastUser.push({user, cardValue: cards.find(c => c.user.id === user.id)?.cardValue})
     })
 
-    const handleChooseValue = async (card: string | number) => {
-        if (!idRoom || Array.isArray(idRoom) || !currentUser) return
+    const handleChooseValue = (card: string | number) => {
+        if (!currentUser) return
         setCurrentCard(card)
         postCardChoosen(card, currentUser, idRoom)
     }
 
     const handleCreateUser = (e: any) => {
-        if (!idRoom || Array.isArray(idRoom)) return
         e.preventDefault()
         const newUser = { name: e.target.name.value, id: uuidv4()}
         setCurrentUser(newUser)
+        setConnectedUsers((users) => [...users, newUser])
         postUserConnected(newUser, idRoom)
-        localStorage.setItem('currentUser', JSON.stringify(newUser))
+        // localStorage.setItem('currentUser', JSON.stringify(newUser))
     }
+    const currentUserRef = useRef(currentUser)
+    const connectedUsersRef = useRef(connectedUsers)
 
     useEffect(() => {
-        if (!idRoom || Array.isArray(idRoom)) return
-        const localUser = localStorage.getItem('currentUser')
-        if (localUser) {
-            setCurrentUser(JSON.parse(localUser))
-            postUserConnected(JSON.parse(localUser), idRoom)
-        }
+        currentUserRef.current = currentUser
+        connectedUsersRef.current = connectedUsers
+    }, [currentUser, connectedUsers])
 
-        const pusher = new Pusher('36a15d9047517284e838', {
+    useEffect(() => {
+        return () => {
+            console.log('dicsonnecting')
+            pusher?.disconnect()
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    useEffect(() => {
+        if(!id || Array.isArray(id)) return
+        // const localUser = localStorage.getItem('currentUser')
+        // if (localUser && !currentUser && JSON.parse(localUser) !== undefined) {
+        //     console.log('localstorage', JSON.parse(localUser))
+        //     setCurrentUser(JSON.parse(localUser))
+        //     postUserConnected(JSON.parse(localUser), idRoom)
+        // }
+        // const localCards = localStorage.getItem('cards')
+        // if (localCards && cards.length === 0) {
+        //     setCards(JSON.parse(localCards))
+        // }
+        // const localConnectedUsers = localStorage.getItem('connectedUsers')
+        // if (localConnectedUsers && connectedUsers.length === 0) {
+        //     setConnectedUsers(JSON.parse(localConnectedUsers))
+        // }
+
+        const newPusher = new Pusher('36a15d9047517284e838', {
             cluster: 'eu',
             userAuthentication: { endpoint: '/api/join-planning', transport: 'jsonp' }
         })
-        const chanel = pusher.subscribe(idRoom);
+        const chanel = newPusher.subscribe(idRoom);
         chanel.bind('card-choosen', (data: CardInterface) => {
             console.log('card-choosen event', data)
             setCards((oldCards) => {
@@ -77,31 +103,30 @@ export default function Room() {
                 } else {
                     newCards[index] = data
                 }
+                // localStorage.setItem('cards', JSON.stringify(newCards))
                 return newCards
             })
         })
         chanel.bind('user-connected', ({ user }: { user: User }) => {
             console.log('user-connected event', user)
             // first, we add the new user to the list of connected users
-            if (!connectedUsers.find(u => u.id === user.id)) {
+            if (!connectedUsersRef.current.find(u => u.id === user.id)) {
                 setConnectedUsers((users) => [...users, user])
-                // then, we send a message to the new user to tell him we are connected & our card choose
-                if (currentUser && user.id !== currentUser.id) {
-                    postUserConnected(currentUser, idRoom)
-                    currentCard && postCardChoosen(currentCard, currentUser, idRoom)
+                // localStorage.setItem('connectedUsers', JSON.stringify([...connectedUsers, user]))
+                // then, we send a message to the new user to tell him we are connected & our choosen card
+                if (currentUserRef.current && user.id !== currentUserRef.current.id) {
+                    postUserConnected(currentUserRef.current, idRoom)
+                    currentCard && postCardChoosen(currentCard, currentUserRef.current, idRoom)
                 }
             }
         })
-        return () => {
-            console.log('dicsonnecting')
-            pusher.disconnect()
-        }
+        setPusher(newPusher)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [idRoom])
+    }, [id])
 
     return (
         <div className="h-full flex flex-col justify-between pb-8">
-            <h1>{routeName}</h1>
+            <h1>{routeName} - {currentUser?.name} </h1>
             {/* <a onClick={() => navigator.clipboard.writeText(window.location.href)}>Inviter des joueurs</a> */}
             
             {!currentUser && 
