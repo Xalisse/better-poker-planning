@@ -53,7 +53,7 @@ export default function Room() {
         setCurrentUser(newUser)
         setConnectedUsers((users) => [...users, newUser])
         postUserConnected(newUser, idRoom)
-        // localStorage.setItem('currentUser', JSON.stringify(newUser))
+        localStorage.setItem('currentUser', JSON.stringify(newUser))
     }
     const currentUserRef = useRef(currentUser)
     const connectedUsersRef = useRef(connectedUsers)
@@ -73,20 +73,19 @@ export default function Room() {
 
     useEffect(() => {
         if(!id || Array.isArray(id)) return
-        // const localUser = localStorage.getItem('currentUser')
-        // if (localUser && !currentUser && JSON.parse(localUser) !== undefined) {
-        //     console.log('localstorage', JSON.parse(localUser))
-        //     setCurrentUser(JSON.parse(localUser))
-        //     postUserConnected(JSON.parse(localUser), idRoom)
-        // }
-        // const localCards = localStorage.getItem('cards')
-        // if (localCards && cards.length === 0) {
-        //     setCards(JSON.parse(localCards))
-        // }
-        // const localConnectedUsers = localStorage.getItem('connectedUsers')
-        // if (localConnectedUsers && connectedUsers.length === 0) {
-        //     setConnectedUsers(JSON.parse(localConnectedUsers))
-        // }
+        const localUser = localStorage.getItem('currentUser')
+        if (localUser && !currentUser && JSON.parse(localUser) !== undefined) {
+            setCurrentUser(JSON.parse(localUser))
+            postUserConnected(JSON.parse(localUser), idRoom)
+        }
+        const localCards = localStorage.getItem('cards')
+        if (localCards && cards.length === 0) {
+            setCards(JSON.parse(localCards))
+        }
+        const localConnectedUsers = localStorage.getItem('connectedUsers')
+        if (localConnectedUsers && connectedUsers.length === 0) {
+            setConnectedUsers(JSON.parse(localConnectedUsers))
+        }
 
         const newPusher = new Pusher('36a15d9047517284e838', {
             cluster: 'eu',
@@ -103,7 +102,7 @@ export default function Room() {
                 } else {
                     newCards[index] = data
                 }
-                // localStorage.setItem('cards', JSON.stringify(newCards))
+                localStorage.setItem('cards', JSON.stringify(newCards))
                 return newCards
             })
         })
@@ -112,7 +111,7 @@ export default function Room() {
             // first, we add the new user to the list of connected users
             if (!connectedUsersRef.current.find(u => u.id === user.id)) {
                 setConnectedUsers((users) => [...users, user])
-                // localStorage.setItem('connectedUsers', JSON.stringify([...connectedUsers, user]))
+                localStorage.setItem('connectedUsers', JSON.stringify([...connectedUsersRef.current, user]))
                 // then, we send a message to the new user to tell him we are connected & our choosen card
                 if (currentUserRef.current && user.id !== currentUserRef.current.id) {
                     postUserConnected(currentUserRef.current, idRoom)
