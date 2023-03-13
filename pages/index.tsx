@@ -8,7 +8,7 @@ export default function Home() {
     const handleNewRoom = (event: any) => {
         event.preventDefault()
         const idRoom = uuidv4()
-        router.push(`/room/${idRoom}?routeName=${roomName}`)
+        router.push(`/room/${idRoom}?routeName=${roomName?.replaceAll(' ', '-')}`)
     }
 
     return (
