@@ -3,6 +3,7 @@ import UserCard from "@/components/UserCard"
 import CardInterface from "@/models/card.model"
 import User from "@/models/user.model"
 import { postMsg } from "@/utils/pusher.utils"
+import Head from "next/head"
 import { useRouter } from "next/router"
 import Pusher from "pusher-js"
 import { useEffect, useRef, useState } from "react"
@@ -146,39 +147,44 @@ export default function Room() {
     }, [id])
 
     return (
-        <div className="h-full flex flex-col justify-between pb-8">
-            <h1>{routeName} - {currentUser?.name} </h1>
-            {/* <a onClick={() => navigator.clipboard.writeText(window.location.href)}>Inviter des joueurs</a> */}
-            
-            {!currentUser && 
-                <form onSubmit={handleCreateUser}>
-                    <label>Saisissez votre nom d&apos;utilisateur</label>
-                    <input name='name'></input>
-                    <button type='submit'>Valider</button>
-                </form>
-            }
-            
-            {currentUser && 
-                <>
-                    <div className="grid grid-cols-[1fr,4fr,1fr] grid-rows-[1fr,4fr,1fr] gap-4 w-2/3 self-center items-center">
-                        <div className='bg-light-pink w-96 h-52 m-auto flex items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
-                            <button onClick={handleFlipCards}>Retourner les cartes</button>
+        <>
+            <Head>
+                <title>{routeName} - Better Poker Planning 🦄</title>
+            </Head>
+            <div className="h-full flex flex-col justify-between pb-8">
+                <h1>{routeName} - {currentUser?.name} </h1>
+                {/* <a onClick={() => navigator.clipboard.writeText(window.location.href)}>Inviter des joueurs</a> */}
+                
+                {!currentUser && 
+                    <form onSubmit={handleCreateUser}>
+                        <label>Saisissez votre nom d&apos;utilisateur</label>
+                        <input name='name'></input>
+                        <button type='submit'>Valider</button>
+                    </form>
+                }
+                
+                {currentUser && 
+                    <>
+                        <div className="grid grid-cols-[1fr,4fr,1fr] grid-rows-[1fr,4fr,1fr] gap-4 w-2/3 self-center items-center">
+                            <div className='bg-light-pink w-96 h-52 m-auto flex items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
+                                <button onClick={handleFlipCards}>Retourner les cartes</button>
+                            </div>
+                            <div className="col-start-2">{northUser.map(({user, cardValue}) => <UserCard key={user.id} user={user} cardValue={cardValue} isFlipped={isFlipped} />)}</div>
+                            <div className="col-start-3 row-start-2">{eastUser.map(({user, cardValue}) => <UserCard key={user.id} user={user} cardValue={cardValue} isFlipped={isFlipped} />)}</div>
+                            <div className="col-start-2 row-start-3">{southUser.map(({user, cardValue}) => <UserCard key={user.id} user={user} cardValue={cardValue} isFlipped={isFlipped} />)}</div>
+                            <div className="col-start-1 row-start-2">{westUser.map(({user, cardValue}) => <UserCard key={user.id} user={user} cardValue={cardValue} isFlipped={isFlipped} />)}</div>
                         </div>
-                        <div className="col-start-2">{northUser.map(({user, cardValue}) => <UserCard key={user.id} user={user} cardValue={cardValue} isFlipped={isFlipped} />)}</div>
-                        <div className="col-start-3 row-start-2">{eastUser.map(({user, cardValue}) => <UserCard key={user.id} user={user} cardValue={cardValue} isFlipped={isFlipped} />)}</div>
-                        <div className="col-start-2 row-start-3">{southUser.map(({user, cardValue}) => <UserCard key={user.id} user={user} cardValue={cardValue} isFlipped={isFlipped} />)}</div>
-                        <div className="col-start-1 row-start-2">{westUser.map(({user, cardValue}) => <UserCard key={user.id} user={user} cardValue={cardValue} isFlipped={isFlipped} />)}</div>
-                    </div>
-                    <div>
-                        <p className="my-2">Choisis une carte</p>
-                        <div className="flex justify-around max-w-4xl m-auto">
-                            {[1, 2, 3, 5, 8, 13, 20, 40, 100, '☕️', '♾️'].map((value) => 
-                                <Card value={value} onClick={() => handleChooseValue(value)} isSelected={value === currentCard} key={value}/>
-                            )}
+                        <div>
+                            <p className="my-2">Choisis une carte</p>
+                            <div className="flex justify-around max-w-4xl m-auto">
+                                {[1, 2, 3, 5, 8, 13, 20, 40, 100, '☕️', '♾️'].map((value) => 
+                                    <Card value={value} onClick={() => handleChooseValue(value)} isSelected={value === currentCard} key={value}/>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                </>
-            }
-        </div>
+                    </>
+                }
+            </div>
+        </>
     )
 }
