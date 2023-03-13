@@ -50,6 +50,7 @@ export default function Room() {
         if (!currentUser) return
         setCurrentCard(card)
         postCardChoosen(card, currentUser, idRoom)
+        localStorage.setItem('currentCard', JSON.stringify(card))
     }
 
     const handleCreateUser = (e: any) => {
@@ -64,6 +65,7 @@ export default function Room() {
     const handleFlipCards = () => {
         setIsFlipped(!isFlipped)
         postFlipCards(!isFlipped, idRoom)
+        localStorage.setItem('isFlipped', JSON.stringify(!isFlipped))
     }
 
     useEffect(() => {
@@ -93,6 +95,14 @@ export default function Room() {
         const localConnectedUsers = localStorage.getItem('connectedUsers')
         if (localConnectedUsers && connectedUsers.length === 0) {
             setConnectedUsers(JSON.parse(localConnectedUsers))
+        }
+        const localCurrentCard = localStorage.getItem('currentCard')
+        if (localCurrentCard && !currentCard) {
+            setCurrentCard(JSON.parse(localCurrentCard))
+        }
+        const localIsFlipped = localStorage.getItem('isFlipped')
+        if (localIsFlipped) {
+            setIsFlipped(JSON.parse(localIsFlipped))
         }
 
         const newPusher = new Pusher('36a15d9047517284e838', {
@@ -129,6 +139,7 @@ export default function Room() {
         })
         chanel.bind('cards-flipped', ({ flipped }: { flipped: boolean }) => {
             setIsFlipped(flipped)
+            localStorage.setItem('isFlipped', JSON.stringify(flipped))
         })
         setPusher(newPusher)
     // eslint-disable-next-line react-hooks/exhaustive-deps
