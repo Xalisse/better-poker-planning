@@ -23,6 +23,10 @@ const postFlipCards = (flipped: boolean, idRoom: string) => {
     return postMsg({ flipped }, idRoom, 'cards-flipped')
 }
 
+const postDisconnectUser = (user: User, idRoom: string) => {
+    return postMsg({ user }, idRoom, 'user-disconnected')
+}
+
 export default function Room() {
     const router = useRouter()
     const { id, routeName } = router.query
@@ -71,13 +75,21 @@ export default function Room() {
         connectedUsersRef.current = connectedUsers
     }, [currentUser, connectedUsers])
 
+    const handleDisconnect = () => {
+        console.log('dicsonnecting')
+        if (currentUserRef.current) {
+            postDisconnectUser(currentUserRef.current, idRoom)
+        } 
+        pusher?.disconnect()
+    }
     useEffect(() => {
+        window.addEventListener('beforeunload', handleDisconnect)
         return () => {
-            console.log('dicsonnecting')
-            pusher?.disconnect()
+            console.log('returning')
+            window.removeEventListener('beforeunload', handleDisconnect)
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [pusher])
 
     useEffect(() => {
         connectedUsers && localStorage.setItem('connectedUsers', JSON.stringify(connectedUsers))
@@ -101,11 +113,6 @@ export default function Room() {
 
     useEffect(() => {
         if(!id || Array.isArray(id)) return
-        const localUser = localStorage.getItem('currentUser')
-        if (localUser && !currentUser && JSON.parse(localUser) !== undefined) {
-            setCurrentUser(JSON.parse(localUser))
-            postUserConnected(JSON.parse(localUser), idRoom)
-        }
         const localCards = localStorage.getItem('cards')
         if (localCards && cards.length === 0) {
             setCards(JSON.parse(localCards))
@@ -113,6 +120,15 @@ export default function Room() {
         const localConnectedUsers = localStorage.getItem('connectedUsers')
         if (localConnectedUsers && connectedUsers.length === 0) {
             setConnectedUsers(JSON.parse(localConnectedUsers))
+        }
+        const localUser = localStorage.getItem('currentUser')
+        if (localUser && !currentUser && JSON.parse(localUser) !== undefined) {
+            const user = JSON.parse(localUser)
+            setCurrentUser(user)
+            postUserConnected(user, idRoom)
+            if (localConnectedUsers && !connectedUsersRef.current.find(u => u.id === user.id)) {
+                setConnectedUsers((oldUsers) => [...oldUsers, user])
+            }
         }
         const localCurrentCard = localStorage.getItem('currentCard')
         if (localCurrentCard && !currentCard) {
@@ -142,7 +158,7 @@ export default function Room() {
             })
         })
         chanel.bind('user-connected', ({ user }: { user: User }) => {
-            console.log('user-connected event', user)
+            console.log('user-connected event', user, connectedUsersRef.current)
             // first, we add the new user to the list of connected users
             if (!connectedUsersRef.current.find(u => u.id === user.id)) {
                 setConnectedUsers((users) => [...users, user])
@@ -156,7 +172,21 @@ export default function Room() {
         chanel.bind('cards-flipped', ({ flipped }: { flipped: boolean }) => {
             setIsFlipped(flipped)
         })
+        chanel.bind('user-disconnected', ({ user }: { user: User }) => {
+            console.log('user-disconnected event', user)
+            setConnectedUsers((users) => users.filter(u => u.id !== user.id))
+            setCards((oldCards) => oldCards.filter(c => c.user.id !== user.id))
+        })
+        if (pusher) {
+            pusher.disconnect()
+        }
         setPusher(newPusher)
+
+
+        return () => {
+            console.log('dicsonnecting')
+            pusher?.disconnect()
+        }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id])
 
