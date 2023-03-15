@@ -131,10 +131,14 @@ export default function Room() {
             if (localConnectedUsers && !connectedUsersRef.current.find(u => u.id === user.id)) {
                 setConnectedUsers((oldUsers) => [...oldUsers, user])
             }
-        }
-        const localCurrentCard = localStorage.getItem('currentCard')
-        if (localCurrentCard && !currentCard) {
-            setCurrentCard(JSON.parse(localCurrentCard))
+            const localCurrentCard = localStorage.getItem('currentCard')
+            if (localCurrentCard && !currentCard) {
+                const card = JSON.parse(localCurrentCard)
+                setCurrentCard(card)
+                if (localCards && !cards.find(c => c.user.id === user.id)) {
+                    setCards((oldCards) => [...oldCards, { user, cardValue: card }])
+                }
+            }
         }
         const localIsFlipped = localStorage.getItem('isFlipped')
         if (localIsFlipped) {
