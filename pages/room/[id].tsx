@@ -221,7 +221,7 @@ export default function Room() {
                     <>
                         <a onClick={() => {navigator.clipboard.writeText(window.location.href); toast("Copié dans le presse-papier ✨")}} className="flex items-center self-center">Inviter des joueurs <FiCopy className="m-2" /></a>
                         <div className="grid grid-cols-[1fr,4fr,1fr] grid-rows-[1fr,4fr,1fr] gap-4 w-2/3 self-center items-center">
-                            <div className='grid grid-rows-3 bg-light-pink w-96 h-52 m-auto items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
+                            <div className='grid grid-rows-3 bg-light-secondary w-96 h-52 m-auto items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
                             <button onClick={handleFlipCards} disabled={cards.length !== connectedUsers.length} className="row-start-2">
                                 {isFlipped ? 'Nouvelle estimation' : 'Retourner les cartes'}
                             </button>

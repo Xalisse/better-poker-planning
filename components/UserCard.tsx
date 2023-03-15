@@ -8,11 +8,11 @@ interface Props {
 }
 
 const BackCard = () => {
-    return <div className="flex items-center justify-center rounded-lg w-12 h-20 bg-pink">🦄</div>
+    return <div className="flex items-center justify-center rounded-lg w-12 h-20 bg-tertiary">🦄</div>
 }
 
 const EmptyCard = () => {
-    return <div className="flex items-center justify-center rounded-lg w-12 h-20 border-2 border-pink"></div>
+    return <div className="flex items-center justify-center rounded-lg w-12 h-20 border-2 border-tertiary"></div>
 }
 
 export default function UserCard({ user, cardValue, isFlipped = false }: Props) {

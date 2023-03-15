@@ -12,7 +12,7 @@ body {
 
 @layer base {
     body {
-        @apply bg-light-lilac;
+        @apply bg-extra-light-secondary text-extra-dark-tertiary;
     }
 
     h1 {
@@ -24,24 +24,26 @@ body {
     }
 
     button {
-        @apply !bg-pink text-light rounded-lg py-2 px-5;
+        @apply !bg-dark-secondary text-extra-light-primary rounded-lg py-2 px-5;
         transition: all 0.3s ease;
     }
     button:hover {
-        background: rgb(238,187,195);
-        background: linear-gradient(214deg, rgba(238,187,195,1) 0%, rgba(184,193,236,1) 100%);
+        background: rgb(197,187,238);
+        background: linear-gradient(214deg, rgba(197,187,238,1) 0%, rgba(255,216,192,1) 100%);
         transform: scale(1.1);
         transform-origin: center;
         transition: all 0.6s ease;
         cursor: pointer;
     }
     button:disabled {
+        @apply border-2 text-extra-dark-tertiary;
         cursor: not-allowed;
-        background: lightgray !important;
+        background: none !important;
         transform: none;
     }
     a {
         transition: all 0.6s ease;
+        @apply text-dark-secondary font-bold;
     }
     a:hover {
         cursor: copy;

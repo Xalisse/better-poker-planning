@@ -17,7 +17,7 @@ export default function Home() {
             <Head>
                 <title>Better Poker Planning 🦄</title>
             </Head>
-            <main className='h-full pt-6'>
+            <main className='pt-6'>
                 <h1 className='mb-44'>Better Poker planning</h1>
                 <form onSubmit={handleNewRoom} className='flex flex-col items-center gap-4'>
                     <input name='name' onChange={(e) => setRoomName(e.target.value)} placeholder='Nom de la salle'></input>
