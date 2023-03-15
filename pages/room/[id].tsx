@@ -207,14 +207,19 @@ export default function Room() {
                 <title>{routeName} - Better Poker Planning 🦄</title>
             </Head>
             <div className="h-full flex flex-col justify-between py-8">
-                <h1>{routeName} - {currentUser?.name} </h1>
+                <div>
+                    <h1>{routeName}</h1>
+                    {currentUser && <h2>Connecté en tant que {currentUser.name}</h2>}
+                </div>
                 
                 {!currentUser && 
-                    <form onSubmit={handleCreateUser}>
-                        <label>Saisissez votre nom d&apos;utilisateur</label>
-                        <input name='name'></input>
-                        <button type='submit'>Valider</button>
-                    </form>
+                    <div className="flex flex-col m-auto gap-4">
+                        <div>Saisissez votre nom d&apos;utilisateur</div>
+                        <form onSubmit={handleCreateUser} className="flex gap-4">
+                            <input name='name'></input>
+                            <button type='submit'>Valider</button>
+                        </form>
+                    </div>
                 }
                 
                 {currentUser && 

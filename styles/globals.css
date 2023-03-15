@@ -19,6 +19,10 @@ body {
         @apply text-4xl text-center;
     }
 
+    h2 {
+        @apply text-xl text-center text-tertiary italic;
+    }
+
     input {
         @apply border-2 rounded-lg p-2;
     }
