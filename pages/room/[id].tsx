@@ -212,6 +212,9 @@ export default function Room() {
                         <div className="grid grid-cols-[1fr,4fr,1fr] grid-rows-[1fr,4fr,1fr] gap-4 w-2/3 self-center items-center">
                             <div className='bg-light-pink w-96 h-52 m-auto flex items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
                                 <button onClick={handleFlipCards}>Retourner les cartes</button>
+                                {isFlipped && <>
+                                    Moyenne : {cards.length > 0 && cards.reduce((acc, c) => acc + c.cardValue, 0) / cards.length}
+                                </>}
                             </div>
                             <div className="col-start-2">{northUser.map(({user, cardValue}) => <UserCard key={user.id} user={user} cardValue={cardValue} isFlipped={isFlipped} />)}</div>
                             <div className="col-start-3 row-start-2">{eastUser.map(({user, cardValue}) => <UserCard key={user.id} user={user} cardValue={cardValue} isFlipped={isFlipped} />)}</div>
