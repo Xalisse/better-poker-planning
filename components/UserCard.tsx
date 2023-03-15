@@ -12,7 +12,7 @@ const BackCard = () => {
 }
 
 const EmptyCard = () => {
-    return <div className="flex items-center justify-center rounded-lg w-12 h-20 border-2 border-pink">🦄</div>
+    return <div className="flex items-center justify-center rounded-lg w-12 h-20 border-2 border-pink"></div>
 }
 
 export default function UserCard({ user, cardValue, isFlipped = false }: Props) {
