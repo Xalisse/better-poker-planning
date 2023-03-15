@@ -197,7 +197,7 @@ export default function Room() {
             <Head>
                 <title>{routeName} - Better Poker Planning 🦄</title>
             </Head>
-            <div className="h-full flex flex-col justify-between pb-8">
+            <div className="h-full flex flex-col justify-between py-8">
                 <h1>{routeName} - {currentUser?.name} </h1>
                 
                 {!currentUser && 
@@ -212,7 +212,7 @@ export default function Room() {
                     <>
                         <a onClick={() => {navigator.clipboard.writeText(window.location.href); toast("Copié dans le presse-papier ✨")}} className="flex items-center self-center">Inviter des joueurs <FiCopy className="m-2" /></a>
                         <div className="grid grid-cols-[1fr,4fr,1fr] grid-rows-[1fr,4fr,1fr] gap-4 w-2/3 self-center items-center">
-                            <div className='bg-light-pink w-96 h-52 m-auto flex items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
+                            <div className='flex flex-col bg-light-pink w-96 h-52 m-auto items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
                                 <button onClick={handleFlipCards} disabled={cards.length !== connectedUsers.length}>Retourner les cartes</button>
                                 {isFlipped && <>
                                     Moyenne : {cards.length > 0 && cards.reduce((acc, c) => acc + c.cardValue, 0) / cards.length}
