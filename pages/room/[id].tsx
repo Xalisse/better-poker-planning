@@ -8,6 +8,7 @@ import { useRouter } from "next/router"
 import Pusher from "pusher-js"
 import { useEffect, useRef, useState } from "react"
 import { v4 as uuidv4 } from 'uuid'
+import { FiCopy } from "react-icons/fi";
 
 type CardValueType = number | string | undefined
 
@@ -197,7 +198,9 @@ export default function Room() {
             </Head>
             <div className="h-full flex flex-col justify-between pb-8">
                 <h1>{routeName} - {currentUser?.name} </h1>
-                {/* <a onClick={() => navigator.clipboard.writeText(window.location.href)}>Inviter des joueurs</a> */}
+                { currentUser &&
+                    <a onClick={() => navigator.clipboard.writeText(window.location.href)} className="flex items-center self-center">Inviter des joueurs <FiCopy className="m-2" /></a>
+                }
                 
                 {!currentUser && 
                     <form onSubmit={handleCreateUser}>

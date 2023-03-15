@@ -20,6 +20,7 @@
     "pusher-js": "^8.0.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-icons": "^4.8.0",
     "typescript": "4.9.4",
     "uuid": "^9.0.0"
   },
