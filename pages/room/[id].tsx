@@ -206,10 +206,15 @@ export default function Room() {
             <Head>
                 <title>{routeName} - Better Poker Planning 🦄</title>
             </Head>
-            <div className="h-full flex flex-col justify-between py-8">
-                <div>
-                    <h1>{routeName}</h1>
-                    {currentUser && <h2>Connecté en tant que {currentUser.name}</h2>}
+            <div className="h-full flex flex-col justify-between pb-8">
+                <div className="grid grid-cols-3 m-2">
+                    <div className="mr-auto cursor-pointer text-4xl" onClick={() => router.push('/')}>
+                        🦄
+                    </div>
+                    <div>
+                        <h1>{routeName}</h1>
+                        {currentUser && <h2>Connecté en tant que {currentUser.name}</h2>}
+                    </div>
                 </div>
                 
                 {!currentUser && 
