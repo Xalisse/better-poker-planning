@@ -1,7 +1,7 @@
 import User from "./user.model"
 
 interface CardInterface {
-  cardValue: number
+  cardValue: number | string
   user: User
 }
 

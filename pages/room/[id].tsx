@@ -236,7 +236,7 @@ export default function Room() {
                                 {isFlipped ? 'Nouvelle estimation' : 'Retourner les cartes'}
                             </button>
                                 {isFlipped && <div className="row-start-3">
-                                    Moyenne : {cards.length > 0 && cards.reduce((acc, c) => acc + c.cardValue, 0) / cards.length}
+                                    Moyenne : {cards.length > 0 && cards.reduce((acc, c) => typeof c.cardValue === 'string' ? acc : acc + c.cardValue, 0) / cards.length}
                                 </div>}
                             </div>
                             <div className="col-start-2">{northUser.map(({user, cardValue}) => <UserCard key={user.id} user={user} cardValue={cardValue} isFlipped={isFlipped} />)}</div>
