@@ -9,6 +9,7 @@ export default function Home() {
     const handleNewRoom = (event: any) => {
         event.preventDefault()
         const idRoom = uuidv4()
+        localStorage.setItem('currentRoom', JSON.stringify({ idRoom, roomName }))
         router.push(`/room/${idRoom}?routeName=${roomName?.replaceAll(' ', '-')}`)
     }
 

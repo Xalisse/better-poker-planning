@@ -114,7 +114,18 @@ export default function Room() {
     }, [currentCard])
 
     useEffect(() => {
-        if(!id || Array.isArray(id)) return
+        if (!id || Array.isArray(id)) return
+        const localCurrentRoom = localStorage.getItem('currentRoom')
+        if (localCurrentRoom) {
+            const room = JSON.parse(localCurrentRoom)
+            if (room.id !== id) {
+                localStorage.removeItem('currentRoom')
+                localStorage.removeItem('cards')
+                localStorage.removeItem('connectedUsers')
+                localStorage.removeItem('currentCard')
+                localStorage.removeItem('isFlipped')
+            }
+        }
         const localCards = localStorage.getItem('cards')
         if (localCards && cards.length === 0) {
             setCards(JSON.parse(localCards))
