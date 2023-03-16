@@ -248,7 +248,7 @@ export default function Room() {
                             <p className="my-2">Choisis une carte</p>
                             <div className="flex justify-around max-w-4xl m-auto">
                                 {[1, 2, 3, 5, 8, 13, 20, 40, 100, '☕️', '♾️'].map((value) => 
-                                    <Card value={value} onClick={() => handleChooseValue(value)} isSelected={value === currentCard} key={value}/>
+                                    <Card value={value} onClick={() => handleChooseValue(value)} isSelected={value === currentCard} disabled={isFlipped} key={value}/>
                                 )}
                             </div>
                         </div>
