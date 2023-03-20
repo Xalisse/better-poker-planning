@@ -31,8 +31,8 @@ const postDisconnectUser = (user: User, idRoom: string) => {
     return postMsg({ user }, idRoom, 'user-disconnected')
 }
 
-const postNameChanged = (user: User, idRoom: string) => {
-    return postMsg({ user }, idRoom, 'name-changed')
+const postUserChanged = (user: User, idRoom: string) => {
+    return postMsg({ user }, idRoom, 'user-changed')
 }
 
 export default function Room() {
@@ -77,6 +77,20 @@ export default function Room() {
             })
     })
 
+    const average = () => {
+        if (cards.length === 0) return '☕️'
+        const total = cards.reduce(
+            (acc, c) =>
+                typeof c.cardValue === 'string' ? acc : acc + c.cardValue,
+            0
+        )
+        const voting = cards.filter(
+            (c) => typeof c.cardValue === 'number' && !c.user.isSpectator
+        ).length
+
+        return total / voting
+    }
+
     const handleChooseValue = (card: string | number) => {
         if (!currentUser) return
         setCurrentCard(card)
@@ -85,7 +99,11 @@ export default function Room() {
 
     const handleCreateUser = (e: any) => {
         e.preventDefault()
-        const newUser = { name: e.target.name.value, id: uuidv4() }
+        const newUser = {
+            name: e.target.name.value,
+            id: uuidv4(),
+            isSpectator: false,
+        }
         setCurrentUser(newUser)
         setConnectedUsers((users) => [...users, newUser])
         postUserConnected(newUser, idRoom)
@@ -98,14 +116,25 @@ export default function Room() {
 
     const handleChangeName = (name: string) => {
         if (!currentUser) return
-        setCurrentUser((user) => ({ id: user?.id || '', name }))
+        setCurrentUser((user) => ({ id: user?.id || '', name, isSpectator: user?.isSpectator || false }))
         setConnectedUsers((users) => {
             const index = users.findIndex((u) => u.id === currentUser.id)
             users[index].name = name
             return users
         })
         setShowModalChangeName(false)
-        postNameChanged({ id: currentUser.id, name }, idRoom)
+        postUserChanged({ id: currentUser.id, name, isSpectator: currentUser.isSpectator }, idRoom)
+    }
+
+    const handleSpectateMode = () => {
+        setCurrentUser((old) => {
+            if (!old) return undefined
+            if (!old.isSpectator) {
+                setCurrentCard(undefined)
+            }
+            postUserChanged({ ...old, isSpectator: !old.isSpectator }, idRoom)
+            return { ...old, isSpectator: !old.isSpectator }
+        })
     }
 
     useEffect(() => {
@@ -262,18 +291,21 @@ export default function Room() {
                 oldCards.filter((c) => c.user.id !== user.id)
             )
         })
-        chanel.bind('name-changed', ({ user }: { user: User }) => {
-            console.log('name-changed event', user)
+        chanel.bind('user-changed', ({ user }: { user: User }) => {
+            console.log('user-changed event', user)
             setConnectedUsers((users) => {
                 const newUsers = [...users]
                 const index = newUsers.findIndex((u) => u.id === user.id)
-                if (index === -1) {
-                    newUsers.push(user)
-                } else {
+                if (index !== -1) {
                     newUsers[index] = user
                 }
                 return newUsers
             })
+            if (user.isSpectator) {
+                setCards((oldCards) =>
+                    oldCards.filter((c) => c.user.id !== user.id)
+                )
+            }
         })
         if (pusher) {
             pusher.disconnect()
@@ -432,33 +464,55 @@ export default function Room() {
                             </div>
                         </div>
                         <div className='fixed flex flex-col items-center bottom-10 w-full bg-extra-light-secondary pt-4'>
-                            <div className='flex w-full justify-center'>
-                                {[
-                                    1,
-                                    2,
-                                    3,
-                                    5,
-                                    8,
-                                    13,
-                                    20,
-                                    40,
-                                    100,
-                                    '☕️',
-                                    '♾️',
-                                ].map((value) => (
-                                    <Card
-                                        value={value}
-                                        onClick={() => handleChooseValue(value)}
-                                        isSelected={value === currentCard}
-                                        isOnHands
-                                        disabled={isFlipped}
-                                        key={value}
-                                    />
-                                ))}
-                            </div>
-                            <div className='mt-2 p-4 rounded-t-full w-1/5 bg-light-secondary'>
-                                Choisis une carte
-                            </div>
+                            {!currentUser.isSpectator && (
+                                <>
+                                    <span
+                                        className='text-dark-secondary font-bold cursor-pointer'
+                                        onClick={handleSpectateMode}
+                                    >
+                                        Mode spectateur 👁️
+                                    </span>
+                                    <p className='my-2'>Choisis une carte</p>
+                                    <div className='flex justify-around max-w-4xl m-auto'>
+                                        {[
+                                            1,
+                                            2,
+                                            3,
+                                            5,
+                                            8,
+                                            13,
+                                            20,
+                                            40,
+                                            100,
+                                            '☕️',
+                                            '♾️',
+                                        ].map((value) => (
+                                            <Card
+                                                value={value}
+                                                onClick={() =>
+                                                    handleChooseValue(value)
+                                                }
+                                                isSelected={
+                                                    value === currentCard
+                                                }
+                                                isOnHands
+                                                disabled={isFlipped}
+                                                key={value}
+                                            />
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+                            {currentUser.isSpectator && (
+                                <>
+                                    <span
+                                        className='text-dark-secondary font-bold cursor-pointer'
+                                        onClick={handleSpectateMode}
+                                    >
+                                        Mode joueur 🃏
+                                    </span>
+                                </>
+                            )}
                         </div>
                     </>
                 )}
