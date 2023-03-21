@@ -10,6 +10,8 @@ import { useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { FiCopy } from 'react-icons/fi'
 import { toast } from 'sonner'
+import { createPortal } from "react-dom"
+import ChangeName from "@/components/ChangeName"
 
 type CardValueType = number | string | undefined
 
@@ -29,6 +31,10 @@ const postDisconnectUser = (user: User, idRoom: string) => {
     return postMsg({ user }, idRoom, 'user-disconnected')
 }
 
+const postNameChanged = (user: User, idRoom: string) => {
+    return postMsg({ user }, idRoom, 'name-changed')
+}
+
 export default function Room() {
     const router = useRouter()
     const { id, routeName } = router.query
@@ -39,6 +45,7 @@ export default function Room() {
     const [currentUser, setCurrentUser] = useState<User>()
     const [isFlipped, setIsFlipped] = useState<boolean>(false)
     const [pusher, setPusher] = useState<Pusher>()
+    const [showModalChangeName, setShowModalChangeName] = useState<boolean>(false)
     const currentUserRef = useRef(currentUser)
     const connectedUsersRef = useRef(connectedUsers)
 
@@ -86,6 +93,18 @@ export default function Room() {
     const handleFlipCards = () => {
         setIsFlipped(!isFlipped)
         postFlipCards(!isFlipped, idRoom)
+    }
+
+    const handleChangeName = (name: string) => {
+        if (!currentUser) return
+        setCurrentUser((user) => ({ id: user?.id || '', name }))
+        setConnectedUsers((users) => {
+            const index = users.findIndex(u => u.id === currentUser.id)
+            users[index].name = name
+            return users
+        })
+        setShowModalChangeName(false)
+        postNameChanged({ id: currentUser.id, name }, idRoom)
     }
 
     useEffect(() => {
@@ -242,6 +261,19 @@ export default function Room() {
                 oldCards.filter((c) => c.user.id !== user.id)
             )
         })
+        chanel.bind('name-changed', ({ user }: { user: User }) => {
+            console.log('name-changed event', user)
+            setConnectedUsers((users) => {
+                const newUsers = [...users]
+                const index = newUsers.findIndex((u) => u.id === user.id)
+                if (index === -1) {
+                    newUsers.push(user)
+                } else {
+                    newUsers[index] = user
+                }
+                return newUsers
+            })
+        })
         if (pusher) {
             pusher.disconnect()
         }
@@ -269,9 +301,14 @@ export default function Room() {
                     </div>
                     <div>
                         <h1>{routeName}</h1>
-                        {currentUser && (
-                            <h2>Connecté en tant que {currentUser.name}</h2>
-                        )}
+                        {currentUser && <h2>Connecté en tant que {currentUser.name}</h2>}
+                        <div>
+                            <a className="cursor-pointer" onClick={() => setShowModalChangeName(true)}>Modifier mon nom</a>
+                            {currentUser?.name && showModalChangeName && createPortal(
+                                <ChangeName onClose={() => setShowModalChangeName(false)} onValidate={handleChangeName} name={currentUser.name} />,
+                                document.body
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -283,7 +320,7 @@ export default function Room() {
                             className='flex gap-4'
                         >
                             <input name='name'></input>
-                            <button type='submit'>Valider</button>
+                            <button type='submit' className="primary">Valider</button>
                         </form>
                     </div>
                 )}

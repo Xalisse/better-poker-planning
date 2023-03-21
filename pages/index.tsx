@@ -34,7 +34,7 @@ export default function Home() {
                         onChange={(e) => setRoomName(e.target.value)}
                         placeholder='Nom de la salle'
                     ></input>
-                    <button type='submit' disabled={!roomName}>
+                    <button type='submit' disabled={!roomName} className="primary">
                         jouer
                     </button>
                 </form>
