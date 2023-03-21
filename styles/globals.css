@@ -32,8 +32,12 @@ body {
         transition: all 0.3s ease;
     }
     button.primary:hover {
-        background: rgb(197,187,238);
-        background: linear-gradient(214deg, rgba(197,187,238,1) 0%, rgba(255,216,192,1) 100%);
+        background: rgb(197, 187, 238);
+        background: linear-gradient(
+            214deg,
+            rgba(197, 187, 238, 1) 0%,
+            rgba(255, 216, 192, 1) 100%
+        );
     }
     button:hover {
         cursor: pointer;
