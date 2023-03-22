@@ -12,6 +12,13 @@ import { FiCopy } from 'react-icons/fi'
 import { toast } from 'sonner'
 import { createPortal } from 'react-dom'
 import ChangeName from '@/components/ChangeName'
+import { initializeApp } from 'firebase/app'
+import { getFirestore, collection } from 'firebase/firestore'
+import { firebaseConfig } from '@/firebase.config'
+import ListStories from '@/components/ListStories'
+
+const app = initializeApp(firebaseConfig)
+const db = getFirestore(app)
 
 type CardValueType = number | string | undefined
 
@@ -331,6 +338,7 @@ export default function Room() {
             <Head>
                 <title>{routeName} - Better Poker Planning 🦄</title>
             </Head>
+            <ListStories idRoom={`${id}`} />
             <div className='w-full h-full flex flex-col justify-between pb-4'>
                 <div className='grid grid-cols-[1fr,4fr,1fr] pt-2'>
                     <div
@@ -413,16 +421,7 @@ export default function Room() {
                                 </button>
                                 {isFlipped && (
                                     <div className='row-start-3'>
-                                        Moyenne :{' '}
-                                        {cards.length > 0 &&
-                                            cards.reduce(
-                                                (acc, c) =>
-                                                    typeof c.cardValue ===
-                                                    'string'
-                                                        ? acc
-                                                        : acc + c.cardValue,
-                                                0
-                                            ) / cards.length}
+                                        Moyenne : {average()}
                                     </div>
                                 )}
                             </div>
