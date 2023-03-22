@@ -27,7 +27,7 @@ export default function UserCard({
     isFlipped = false,
 }: Props) {
     return (
-        <div className='flex flex-col w-fit m-auto'>
+        <div className='flex flex-col items-center w-fit'>
             {isFlipped && <Card value={cardValue || ''} />}
             {!isFlipped && cardValue && <BackCard />}
             {!isFlipped && !cardValue && <EmptyCard />}

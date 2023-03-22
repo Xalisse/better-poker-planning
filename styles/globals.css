@@ -4,6 +4,7 @@
 
 body {
     height: 100vh;
+    overflow-x: hidden;
     text-align: center;
 }
 #__next {
@@ -57,5 +58,20 @@ body {
         cursor: copy;
         transform: scale(1.1);
         transition: all 0.6s ease;
+    }
+
+    .draw-card:hover {
+        animation: drawIn 0.2s forwards;
+    }
+
+    @keyframes drawIn {
+        0% {
+        }
+        50% {
+            transform: translateX(-0.5em);
+        }
+        100% {
+            transform: translateX(0.5em) translateY(-20px) scale(1.2);
+        }
     }
 }

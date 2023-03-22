@@ -23,7 +23,7 @@ export default function Home() {
             <Head>
                 <title>Better Poker Planning 🦄</title>
             </Head>
-            <main className='pt-6'>
+            <div className='pt-6'>
                 <h1 className='mb-44'>Better Poker planning</h1>
                 <form
                     onSubmit={handleNewRoom}
@@ -38,7 +38,7 @@ export default function Home() {
                         jouer
                     </button>
                 </form>
-            </main>
+            </div>
         </>
     )
 }

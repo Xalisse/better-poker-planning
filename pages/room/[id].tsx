@@ -259,20 +259,37 @@ export default function Room() {
             <Head>
                 <title>{routeName} - Better Poker Planning 🦄</title>
             </Head>
-            <div className='h-full flex flex-col justify-between pb-8'>
-                <div className='grid grid-cols-3 m-2'>
+            <div className='w-full h-full flex flex-col justify-between pb-4'>
+                <div className='grid grid-cols-[1fr,4fr,1fr] pt-2'>
                     <div
-                        className='mr-auto cursor-pointer text-4xl'
+                        className='pl-4 flex justify-left items-center cursor-pointer text-5xl'
                         onClick={() => router.push('/')}
                     >
-                        🦄
+                        <span className='transition-all hover:scale-110'>
+                            🦄
+                        </span>
                     </div>
-                    <div>
+                    <div className=''>
                         <h1>{routeName}</h1>
                         {currentUser && (
                             <h2>Connecté en tant que {currentUser.name}</h2>
                         )}
                     </div>
+                    {currentUser && (
+                        <div className='flex justify-center items-center'>
+                            <a
+                                onClick={() => {
+                                    navigator.clipboard.writeText(
+                                        window.location.href
+                                    )
+                                    toast('Copié dans le presse-papier ✨')
+                                }}
+                                className='flex flex-row justify-right items-center'
+                            >
+                                Inviter des joueurs <FiCopy className='mx-2' />
+                            </a>
+                        </div>
+                    )}
                 </div>
 
                 {!currentUser && (
@@ -290,21 +307,13 @@ export default function Room() {
 
                 {currentUser && (
                     <>
-                        <a
-                            onClick={() => {
-                                navigator.clipboard.writeText(
-                                    window.location.href
-                                )
-                                toast('Copié dans le presse-papier ✨')
-                            }}
-                            className='flex items-center self-center'
-                        >
-                            Inviter des joueurs <FiCopy className='m-2' />
-                        </a>
-                        <div className='grid grid-cols-[1fr,4fr,1fr] grid-rows-[1fr,4fr,1fr] gap-4 w-2/3 self-center items-center'>
-                            <div className='grid grid-rows-3 bg-light-secondary w-96 h-52 m-auto items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
+                        <div className='grid grid-cols-[1fr,3fr,1fr] grid-rows-[2fr,3fr,2fr] w-2/3 self-center py-10 gap-4'>
+                            <div className='grid grid-rows-3 bg-light-secondary w-full h-full m-auto items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
                                 <button
                                     onClick={handleFlipCards}
+                                    disabled={
+                                        cards.length !== connectedUsers.length
+                                    }
                                     className='row-start-2'
                                 >
                                     {isFlipped
@@ -326,7 +335,7 @@ export default function Room() {
                                     </div>
                                 )}
                             </div>
-                            <div className='col-start-2'>
+                            <div className='col-start-1 col-end-4 row-start-1 flex flex-row justify-center items-center gap-12'>
                                 {northUser.map(({ user, cardValue }) => (
                                     <UserCard
                                         key={user.id}
@@ -336,7 +345,7 @@ export default function Room() {
                                     />
                                 ))}
                             </div>
-                            <div className='col-start-3 row-start-2'>
+                            <div className='col-start-3 row-start-2 flex flex-col justify-center items-center gap-8'>
                                 {eastUser.map(({ user, cardValue }) => (
                                     <UserCard
                                         key={user.id}
@@ -346,7 +355,7 @@ export default function Room() {
                                     />
                                 ))}
                             </div>
-                            <div className='col-start-2 row-start-3'>
+                            <div className='col-start-1 col-end-4 row-start-3 flex flex-row justify-center items-center gap-12'>
                                 {southUser.map(({ user, cardValue }) => (
                                     <UserCard
                                         key={user.id}
@@ -356,7 +365,7 @@ export default function Room() {
                                     />
                                 ))}
                             </div>
-                            <div className='col-start-1 row-start-2'>
+                            <div className='col-start-1 row-start-2 flex flex-col justify-center items-center gap-8'>
                                 {westUser.map(({ user, cardValue }) => (
                                     <UserCard
                                         key={user.id}
@@ -367,9 +376,8 @@ export default function Room() {
                                 ))}
                             </div>
                         </div>
-                        <div>
-                            <p className='my-2'>Choisis une carte</p>
-                            <div className='flex justify-around max-w-4xl m-auto'>
+                        <div className='fixed flex flex-col items-center bottom-10 w-full bg-extra-light-secondary pt-4'>
+                            <div className='flex w-full justify-center'>
                                 {[
                                     1,
                                     2,
@@ -387,10 +395,14 @@ export default function Room() {
                                         value={value}
                                         onClick={() => handleChooseValue(value)}
                                         isSelected={value === currentCard}
+                                        isOnHands
                                         disabled={isFlipped}
                                         key={value}
                                     />
                                 ))}
+                            </div>
+                            <div className='mt-2 p-4 rounded-t-full w-1/5 bg-light-secondary'>
+                                Choisis une carte
                             </div>
                         </div>
                     </>
