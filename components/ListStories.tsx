@@ -10,6 +10,7 @@ import {
 import { firebaseConfig } from '@/firebase.config'
 import { FormEventHandler, useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import { useFormik } from 'formik'
 
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
@@ -20,22 +21,34 @@ interface Props {
 
 const ListStories = ({ idRoom }: Props) => {
     const [stories, setStories] = useState<DocumentData[]>([])
-    const [title, setTitle] = useState<string>('')
+    const [error, setError] = useState<string>()
 
-    const handleAddStory = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        const storiesRef = doc(db, 'rooms', idRoom)
-        const storiesSnapshot = await getDoc(storiesRef)
-        const storiesList = storiesSnapshot.data()?.stories
-        const newStory = {
-            id: uuidv4(),
-            title,
-        }
-        const newStories = [...storiesList, newStory]
-        await setDoc(storiesRef, {
-            stories: newStories,
-        })
-    }
+    const { handleChange, handleSubmit } = useFormik({
+        initialValues: {
+            title: '',
+        },
+        onSubmit: async ({ title }, { resetForm }) => {
+            if (!title) return setError('Le titre est obligatoire')
+            try {
+                const storiesRef = doc(db, 'rooms', idRoom)
+                const storiesSnapshot = await getDoc(storiesRef)
+                const storiesList = storiesSnapshot.data()?.stories
+                const newStory = {
+                    id: uuidv4(),
+                    title,
+                }
+                const newStories = [...storiesList, newStory]
+                await setDoc(storiesRef, {
+                    stories: newStories,
+                })
+                setError(undefined)
+                resetForm()
+            } catch (err) {
+                console.error(err)
+                setError('Une erreur est survenue')
+            }
+        },
+    })
 
     useEffect(() => {
         const getStories = async () => {
@@ -55,14 +68,16 @@ const ListStories = ({ idRoom }: Props) => {
                 <li key={story.id}>{story.title}</li>
             ))}
 
-            <form onSubmit={handleAddStory}>
+            <form onSubmit={handleSubmit}>
                 <input
+                    name='title'
                     placeholder="Titre de l'US"
-                    onChange={(e) => setTitle(e.currentTarget.value)}
+                    onChange={handleChange}
                 />
                 <button type='submit' className='primary'>
                     +
                 </button>
+                {error && <p>{error}</p>}
             </form>
         </section>
     )
