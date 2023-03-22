@@ -405,9 +405,6 @@ export default function Room() {
                             <div className='grid grid-rows-3 bg-light-secondary w-full h-full m-auto items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
                                 <button
                                     onClick={handleFlipCards}
-                                    disabled={
-                                        cards.length !== connectedUsers.length
-                                    }
                                     className='row-start-2'
                                 >
                                     {isFlipped
