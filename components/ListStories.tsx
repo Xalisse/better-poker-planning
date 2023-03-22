@@ -63,23 +63,25 @@ const ListStories = ({ idRoom }: Props) => {
     }, [idRoom])
 
     return (
-        <section>
-            {stories.map((story) => (
-                <li key={story.id}>{story.title}</li>
-            ))}
-
-            <form onSubmit={handleSubmit}>
+        <>
+            <div>
+                {stories.map((story) => (
+                    <li key={story.id}>{story.title}</li>
+                ))}
+            </div>
+            <form onSubmit={handleSubmit} className='flex justify-end'>
                 <input
                     name='title'
                     placeholder="Titre de l'US"
                     onChange={handleChange}
+                    className='flex-1'
                 />
-                <button type='submit' className='primary'>
+                <button type='submit' className='primary ml-2'>
                     +
                 </button>
                 {error && <p>{error}</p>}
             </form>
-        </section>
+        </>
     )
 }
 
