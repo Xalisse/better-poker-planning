@@ -116,14 +116,21 @@ export default function Room() {
 
     const handleChangeName = (name: string) => {
         if (!currentUser) return
-        setCurrentUser((user) => ({ id: user?.id || '', name, isSpectator: user?.isSpectator || false }))
+        setCurrentUser((user) => ({
+            id: user?.id || '',
+            name,
+            isSpectator: user?.isSpectator || false,
+        }))
         setConnectedUsers((users) => {
             const index = users.findIndex((u) => u.id === currentUser.id)
             users[index].name = name
             return users
         })
         setShowModalChangeName(false)
-        postUserChanged({ id: currentUser.id, name, isSpectator: currentUser.isSpectator }, idRoom)
+        postUserChanged(
+            { id: currentUser.id, name, isSpectator: currentUser.isSpectator },
+            idRoom
+        )
     }
 
     const handleSpectateMode = () => {
