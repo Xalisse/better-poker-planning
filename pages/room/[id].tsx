@@ -1,8 +1,12 @@
-import Card from '@/components/Card'
-import UserCard from '@/components/UserCard'
-import CardInterface from '@/models/card.model'
 import User from '@/models/user.model'
-import { postMsg } from '@/utils/pusher.utils'
+import {
+    postCardChoosen,
+    postDisconnectUser,
+    postFlipCards,
+    postSelectedStory,
+    postUserChanged,
+    postUserConnected,
+} from '@/utils/pusher.utils'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Pusher from 'pusher-js'
@@ -17,43 +21,18 @@ import StoryDetails from '@/components/StoryDetails'
 import {
     doc,
     DocumentData,
-    getDoc,
     getFirestore,
     onSnapshot,
     updateDoc,
 } from 'firebase/firestore'
 import { initializeApp } from 'firebase/app'
 import { firebaseConfig } from '@/firebase.config'
-import { useFormik } from 'formik'
-
-type CardValueType = number | string | undefined
+import PokerTable from '@/components/PokerTable'
+import PlayerHand from '@/components/PlayerHand'
+import { CardInterface, CardValueType } from '@/models/card.model'
 
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
-
-const postCardChoosen = (card: number | string, user: User, idRoom: string) => {
-    return postMsg({ cardValue: card, user }, idRoom, 'card-choosen')
-}
-
-const postUserConnected = (user: User, idRoom: string) => {
-    return postMsg({ user }, idRoom, 'user-connected')
-}
-
-const postFlipCards = (flipped: boolean, idRoom: string) => {
-    return postMsg({ flipped }, idRoom, 'cards-flipped')
-}
-
-const postDisconnectUser = (user: User, idRoom: string) => {
-    return postMsg({ user }, idRoom, 'user-disconnected')
-}
-
-const postUserChanged = (user: User, idRoom: string) => {
-    return postMsg({ user }, idRoom, 'user-changed')
-}
-
-const postSelectedStory = (storyId: string, idRoom: string) => {
-    return postMsg({ storyId }, idRoom, 'selected-story')
-}
 
 export default function Room() {
     const router = useRouter()
@@ -63,7 +42,6 @@ export default function Room() {
     const [cards, setCards] = useState<CardInterface[]>([])
     const [connectedUsers, setConnectedUsers] = useState<User[]>([])
     const [currentUser, setCurrentUser] = useState<User>()
-    const [isFlipped, setIsFlipped] = useState<boolean>(false)
     const [pusher, setPusher] = useState<Pusher>()
     const [showModalChangeName, setShowModalChangeName] =
         useState<boolean>(false)
@@ -72,74 +50,10 @@ export default function Room() {
     const [showUS, setShowUS] = useState<boolean>(false)
     const [selectedStoryId, setSelectedStoryId] = useState<string>()
     const [selectedStory, setSelectedStory] = useState<DocumentData>()
+    const [isFlipped, setIsFlipped] = useState<boolean>(false)
 
-    const northUser: { user: User; cardValue: CardValueType }[] = []
-    const eastUser: { user: User; cardValue: CardValueType }[] = []
-    const westUser: { user: User; cardValue: CardValueType }[] = []
-    const southUser: { user: User; cardValue: CardValueType }[] = []
-    connectedUsers.forEach((user, index) => {
-        index % 4 === 0 &&
-            southUser.push({
-                user,
-                cardValue: cards.find((c) => c.user.id === user.id)?.cardValue,
-            })
-        index % 4 === 1 &&
-            northUser.push({
-                user,
-                cardValue: cards.find((c) => c.user.id === user.id)?.cardValue,
-            })
-        index % 4 === 2 &&
-            westUser.push({
-                user,
-                cardValue: cards.find((c) => c.user.id === user.id)?.cardValue,
-            })
-        index % 4 === 3 &&
-            eastUser.push({
-                user,
-                cardValue: cards.find((c) => c.user.id === user.id)?.cardValue,
-            })
-    })
-
-    const average = () => {
-        if (cards.length === 0) return '☕️'
-        const total = cards.reduce(
-            (acc, c) =>
-                typeof c.cardValue === 'string' ? acc : acc + c.cardValue,
-            0
-        )
-        const voting = cards.filter(
-            (c) => typeof c.cardValue === 'number' && !c.user.isSpectator
-        ).length
-
-        return total / voting
-    }
-
-    const {
-        handleChange: handleChangeEstimation,
-        handleSubmit: handleSaveEstimation,
-        setFieldValue: setEstimationValue,
-        values: valuesEstimation,
-    } = useFormik({
-        initialValues: {
-            value: '',
-        },
-        onSubmit: async ({ value }) => {
-            if (!selectedStoryId || !value) return
-            // save estimation to firebase
-            const storyRef = doc(
-                db,
-                'rooms',
-                `${id}`,
-                'stories',
-                selectedStoryId
-            )
-            await updateDoc(storyRef, { estimation: value })
-            toast.success('Éstimation sauvegardée 🪩')
-        },
-    })
-
-    const handleChooseValue = (card: string | number) => {
-        if (!currentUser) return
+    const handleChooseValue = (card: CardValueType) => {
+        if (!currentUser || !card) return
         setCurrentCard(card)
         postCardChoosen(card, currentUser, idRoom)
     }
@@ -156,10 +70,9 @@ export default function Room() {
         postUserConnected(newUser, idRoom)
     }
 
-    const handleFlipCards = () => {
-        setIsFlipped(!isFlipped)
-        postFlipCards(!isFlipped, idRoom)
-        setEstimationValue('value', average())
+    const handleFlipCards = (isFlipped: boolean) => {
+        setIsFlipped(isFlipped)
+        postFlipCards(isFlipped, idRoom)
     }
 
     const handleChangeName = (name: string) => {
@@ -200,6 +113,22 @@ export default function Room() {
         postFlipCards(false, idRoom)
     }
 
+    const handleSaveEstimation = async (value: string) => {
+        if (!selectedStoryId) return
+        // save estimation to firebase
+        const storyRef = doc(db, 'rooms', `${id}`, 'stories', selectedStoryId)
+        await updateDoc(storyRef, { estimation: value })
+        toast.success('Éstimation sauvegardée 🪩')
+    }
+
+    const handleDisconnect = () => {
+        console.log('dicsonnecting')
+        if (currentUserRef.current) {
+            postDisconnectUser(currentUserRef.current, idRoom)
+        }
+        pusher?.disconnect()
+    }
+
     useEffect(() => {
         if (!selectedStoryId) return
         const storyRef = doc(db, 'rooms', `${id}`, 'stories', selectedStoryId)
@@ -214,13 +143,6 @@ export default function Room() {
         connectedUsersRef.current = connectedUsers
     }, [currentUser, connectedUsers])
 
-    const handleDisconnect = () => {
-        console.log('dicsonnecting')
-        if (currentUserRef.current) {
-            postDisconnectUser(currentUserRef.current, idRoom)
-        }
-        pusher?.disconnect()
-    }
     useEffect(() => {
         window.addEventListener('beforeunload', handleDisconnect)
         return () => {
@@ -241,10 +163,6 @@ export default function Room() {
     useEffect(() => {
         cards && localStorage.setItem('cards', JSON.stringify(cards))
     }, [cards])
-
-    useEffect(() => {
-        localStorage.setItem('isFlipped', JSON.stringify(isFlipped))
-    }, [isFlipped])
 
     useEffect(() => {
         currentUser &&
@@ -299,10 +217,6 @@ export default function Room() {
                     ])
                 }
             }
-        }
-        const localIsFlipped = localStorage.getItem('isFlipped')
-        if (localIsFlipped) {
-            setIsFlipped(JSON.parse(localIsFlipped))
         }
 
         const newPusher = new Pusher('36a15d9047517284e838', {
@@ -470,133 +384,21 @@ export default function Room() {
 
                 {currentUser && (
                     <>
-                        <div className='grid grid-cols-[1fr,3fr,1fr] grid-rows-[2fr,3fr,2fr] w-2/3 self-center py-10 gap-4'>
-                            <div className='grid grid-rows-3 bg-light-secondary w-full h-full m-auto items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
-                                {selectedStory && (
-                                    <div>{selectedStory.title}</div>
-                                )}
-                                <button
-                                    onClick={handleFlipCards}
-                                    className='row-start-2 m-2 primary'
-                                >
-                                    {isFlipped
-                                        ? 'Nouvelle estimation'
-                                        : 'Retourner les cartes'}
-                                </button>
-                                {isFlipped && (
-                                    <form
-                                        className='row-start-3'
-                                        onSubmit={handleSaveEstimation}
-                                    >
-                                        Estimation :{' '}
-                                        <input
-                                            name='value'
-                                            onChange={handleChangeEstimation}
-                                            value={valuesEstimation.value}
-                                        />
-                                        <button
-                                            className='primary m-2'
-                                            type='submit'
-                                        >
-                                            Sauvegarder
-                                        </button>
-                                    </form>
-                                )}
-                            </div>
-                            <div className='col-start-1 col-end-4 row-start-1 flex flex-row justify-center items-center gap-12'>
-                                {northUser.map(({ user, cardValue }) => (
-                                    <UserCard
-                                        key={user.id}
-                                        user={user}
-                                        cardValue={cardValue}
-                                        isFlipped={isFlipped}
-                                    />
-                                ))}
-                            </div>
-                            <div className='col-start-3 row-start-2 flex flex-col justify-center items-center gap-8'>
-                                {eastUser.map(({ user, cardValue }) => (
-                                    <UserCard
-                                        key={user.id}
-                                        user={user}
-                                        cardValue={cardValue}
-                                        isFlipped={isFlipped}
-                                    />
-                                ))}
-                            </div>
-                            <div className='col-start-1 col-end-4 row-start-3 flex flex-row justify-center items-center gap-12'>
-                                {southUser.map(({ user, cardValue }) => (
-                                    <UserCard
-                                        key={user.id}
-                                        user={user}
-                                        cardValue={cardValue}
-                                        isFlipped={isFlipped}
-                                    />
-                                ))}
-                            </div>
-                            <div className='col-start-1 row-start-2 flex flex-col justify-center items-center gap-8'>
-                                {westUser.map(({ user, cardValue }) => (
-                                    <UserCard
-                                        key={user.id}
-                                        user={user}
-                                        cardValue={cardValue}
-                                        isFlipped={isFlipped}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                        <div className='fixed flex flex-col items-center bottom-10 w-full bg-extra-light-secondary pt-4'>
-                            {!currentUser.isSpectator && (
-                                <>
-                                    <span
-                                        className='text-dark-secondary font-bold cursor-pointer'
-                                        onClick={handleSpectateMode}
-                                    >
-                                        Mode spectateur 👁️
-                                    </span>
-                                    <div className='flex justify-around max-w-4xl m-auto'>
-                                        {[
-                                            1,
-                                            2,
-                                            3,
-                                            5,
-                                            8,
-                                            13,
-                                            20,
-                                            40,
-                                            100,
-                                            '☕️',
-                                            '♾️',
-                                        ].map((value) => (
-                                            <Card
-                                                value={value}
-                                                onClick={() =>
-                                                    handleChooseValue(value)
-                                                }
-                                                isSelected={
-                                                    value === currentCard
-                                                }
-                                                isOnHands
-                                                disabled={isFlipped}
-                                                key={value}
-                                            />
-                                        ))}
-                                    </div>
-                                    <div className='mt-2 p-4 rounded-t-full w-1/5 bg-light-secondary'>
-                                        Choisis une carte
-                                    </div>
-                                </>
-                            )}
-                            {currentUser.isSpectator && (
-                                <>
-                                    <span
-                                        className='text-dark-secondary font-bold cursor-pointer'
-                                        onClick={handleSpectateMode}
-                                    >
-                                        Mode joueur 🃏
-                                    </span>
-                                </>
-                            )}
-                        </div>
+                        <PokerTable
+                            selectedStoryId={selectedStoryId}
+                            selectedStoryTitle={selectedStory?.title}
+                            playerCards={cards}
+                            connectedUsers={connectedUsers}
+                            doFlipCards={handleFlipCards}
+                            saveEstimation={handleSaveEstimation}
+                        />
+                        <PlayerHand
+                            currentCard={currentCard}
+                            currentUser={currentUser}
+                            handleSpectateMode={handleSpectateMode}
+                            handleChooseValue={handleChooseValue}
+                            isFlipped={isFlipped}
+                        />
                     </>
                 )}
             </div>

@@ -1,8 +1,7 @@
 import User from './user.model'
 
-interface CardInterface {
+export type CardValueType = number | string | undefined
+export interface CardInterface {
     cardValue: number | string
     user: User
 }
-
-export default CardInterface
