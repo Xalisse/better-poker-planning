@@ -195,6 +195,9 @@ export default function Room() {
     const handleSelectStory = (storyId: string) => {
         setSelectedStoryId(storyId)
         postSelectedStory(storyId, idRoom)
+        // we reset the game
+        setIsFlipped(false)
+        postFlipCards(false, idRoom)
     }
 
     useEffect(() => {
