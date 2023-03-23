@@ -12,15 +12,24 @@ import { FiCopy } from 'react-icons/fi'
 import { toast } from 'sonner'
 import { createPortal } from 'react-dom'
 import ChangeName from '@/components/ChangeName'
-import { initializeApp } from 'firebase/app'
-import { getFirestore, collection } from 'firebase/firestore'
-import { firebaseConfig } from '@/firebase.config'
 import ListStories from '@/components/ListStories'
+import StoryDetails from '@/components/StoryDetails'
+import {
+    doc,
+    DocumentData,
+    getDoc,
+    getFirestore,
+    onSnapshot,
+    updateDoc,
+} from 'firebase/firestore'
+import { initializeApp } from 'firebase/app'
+import { firebaseConfig } from '@/firebase.config'
+import { useFormik } from 'formik'
+
+type CardValueType = number | string | undefined
 
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
-
-type CardValueType = number | string | undefined
 
 const postCardChoosen = (card: number | string, user: User, idRoom: string) => {
     return postMsg({ cardValue: card, user }, idRoom, 'card-choosen')
@@ -42,6 +51,10 @@ const postUserChanged = (user: User, idRoom: string) => {
     return postMsg({ user }, idRoom, 'user-changed')
 }
 
+const postSelectedStory = (storyId: string, idRoom: string) => {
+    return postMsg({ storyId }, idRoom, 'selected-story')
+}
+
 export default function Room() {
     const router = useRouter()
     const { id, routeName } = router.query
@@ -57,6 +70,8 @@ export default function Room() {
     const currentUserRef = useRef(currentUser)
     const connectedUsersRef = useRef(connectedUsers)
     const [showUS, setShowUS] = useState<boolean>(false)
+    const [selectedStoryId, setSelectedStoryId] = useState<string>()
+    const [selectedStory, setSelectedStory] = useState<DocumentData>()
 
     const northUser: { user: User; cardValue: CardValueType }[] = []
     const eastUser: { user: User; cardValue: CardValueType }[] = []
@@ -99,6 +114,30 @@ export default function Room() {
         return total / voting
     }
 
+    const {
+        handleChange: handleChangeEstimation,
+        handleSubmit: handleSaveEstimation,
+        setFieldValue: setEstimationValue,
+        values: valuesEstimation,
+    } = useFormik({
+        initialValues: {
+            value: '',
+        },
+        onSubmit: async ({ value }) => {
+            if (!selectedStoryId || !value) return
+            // save estimation to firebase
+            const storyRef = doc(
+                db,
+                'rooms',
+                `${id}`,
+                'stories',
+                selectedStoryId
+            )
+            await updateDoc(storyRef, { estimation: value })
+            toast.success('Éstimation sauvegardée 🪩')
+        },
+    })
+
     const handleChooseValue = (card: string | number) => {
         if (!currentUser) return
         setCurrentCard(card)
@@ -120,6 +159,7 @@ export default function Room() {
     const handleFlipCards = () => {
         setIsFlipped(!isFlipped)
         postFlipCards(!isFlipped, idRoom)
+        setEstimationValue('value', average())
     }
 
     const handleChangeName = (name: string) => {
@@ -151,6 +191,23 @@ export default function Room() {
             return { ...old, isSpectator: !old.isSpectator }
         })
     }
+
+    const handleSelectStory = (storyId: string) => {
+        setSelectedStoryId(storyId)
+        postSelectedStory(storyId, idRoom)
+        // we reset the game
+        setIsFlipped(false)
+        postFlipCards(false, idRoom)
+    }
+
+    useEffect(() => {
+        if (!selectedStoryId) return
+        const storyRef = doc(db, 'rooms', `${id}`, 'stories', selectedStoryId)
+        const unsub = onSnapshot(storyRef, (doc) => {
+            setSelectedStory(doc.data())
+        })
+        return () => unsub()
+    }, [selectedStoryId, id])
 
     useEffect(() => {
         currentUserRef.current = currentUser
@@ -322,6 +379,10 @@ export default function Room() {
                 )
             }
         })
+        chanel.bind('selected-story', ({ storyId }: { storyId: string }) => {
+            console.log('selected-story event', storyId)
+            setSelectedStoryId(storyId)
+        })
         if (pusher) {
             pusher.disconnect()
         }
@@ -411,18 +472,35 @@ export default function Room() {
                     <>
                         <div className='grid grid-cols-[1fr,3fr,1fr] grid-rows-[2fr,3fr,2fr] w-2/3 self-center py-10 gap-4'>
                             <div className='grid grid-rows-3 bg-light-secondary w-full h-full m-auto items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
+                                {selectedStory && (
+                                    <div>{selectedStory.title}</div>
+                                )}
                                 <button
                                     onClick={handleFlipCards}
-                                    className='row-start-2'
+                                    className='row-start-2 m-2 primary'
                                 >
                                     {isFlipped
                                         ? 'Nouvelle estimation'
                                         : 'Retourner les cartes'}
                                 </button>
                                 {isFlipped && (
-                                    <div className='row-start-3'>
-                                        Moyenne : {average()}
-                                    </div>
+                                    <form
+                                        className='row-start-3'
+                                        onSubmit={handleSaveEstimation}
+                                    >
+                                        Estimation :{' '}
+                                        <input
+                                            name='value'
+                                            onChange={handleChangeEstimation}
+                                            value={valuesEstimation.value}
+                                        />
+                                        <button
+                                            className='primary m-2'
+                                            type='submit'
+                                        >
+                                            Sauvegarder
+                                        </button>
+                                    </form>
                                 )}
                             </div>
                             <div className='col-start-1 col-end-4 row-start-1 flex flex-row justify-center items-center gap-12'>
@@ -535,13 +613,32 @@ export default function Room() {
                     <>
                         <button
                             onClick={() => setShowUS(false)}
-                            className='absolute right-[40%] top-[17%] rounded-r-none text-dark-tertiary !bg-white border-2 border-r-0 border-dark-tertiary'
+                            className='absolute right-[33%] top-[17%] rounded-r-none text-dark-tertiary !bg-white border-2 border-r-0 border-dark-tertiary'
                         >
                             {' >'}
                         </button>
-                        <div className='absolute right-0 top-[15%] h-[70%] w-2/5'>
+                        <div className='absolute right-0 top-[15%] h-[70%] w-1/3'>
                             <div className='rounded-l-xl bg-white border-2 border-r-0 border-dark-tertiary h-full p-5 text-left overflow-auto flex flex-col justify-between'>
-                                <ListStories idRoom={`${id}`} />
+                                {selectedStoryId && (
+                                    <div>
+                                        <p className='text-lg italic'>
+                                            En cours d&apos;estimation
+                                        </p>
+                                        <StoryDetails
+                                            story={selectedStory as any}
+                                        />
+                                    </div>
+                                )}
+                                <div>
+                                    <p className='text-lg italic'>
+                                        Toutes les user stories
+                                    </p>
+                                    <ListStories
+                                        idRoom={`${id}`}
+                                        selectedStoryId={selectedStoryId}
+                                        selectStory={handleSelectStory}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </>,

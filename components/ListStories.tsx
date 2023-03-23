@@ -2,26 +2,30 @@ import { initializeApp } from 'firebase/app'
 import {
     getFirestore,
     DocumentData,
-    doc,
-    getDoc,
-    setDoc,
     onSnapshot,
+    collection,
+    addDoc,
 } from 'firebase/firestore'
 import { firebaseConfig } from '@/firebase.config'
-import { FormEventHandler, useEffect, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
+import { useEffect, useState } from 'react'
 import { useFormik } from 'formik'
+import { createPortal } from 'react-dom'
+import AddStoryModal from './AddStoryModal'
 
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
 
 interface Props {
     idRoom: string
+    selectedStoryId?: string
+    selectStory: (id: string) => void
 }
 
-const ListStories = ({ idRoom }: Props) => {
+const ListStories = ({ idRoom, selectStory, selectedStoryId }: Props) => {
     const [stories, setStories] = useState<DocumentData[]>([])
     const [error, setError] = useState<string>()
+    const [showModalCreateStory, setShowModalCreateStory] =
+        useState<boolean>(false)
 
     const { handleChange, handleSubmit } = useFormik({
         initialValues: {
@@ -30,18 +34,13 @@ const ListStories = ({ idRoom }: Props) => {
         onSubmit: async ({ title }, { resetForm }) => {
             if (!title) return setError('Le titre est obligatoire')
             try {
-                const storiesRef = doc(db, 'rooms', idRoom)
-                const storiesSnapshot = await getDoc(storiesRef)
-                const storiesList = storiesSnapshot.data()?.stories
+                const storiesRef = collection(db, 'rooms', idRoom, 'stories')
                 const newStory = {
-                    id: uuidv4(),
                     title,
                 }
-                const newStories = [...storiesList, newStory]
-                await setDoc(storiesRef, {
-                    stories: newStories,
-                })
+                await addDoc(storiesRef, newStory)
                 setError(undefined)
+                setShowModalCreateStory(false)
                 resetForm()
             } catch (err) {
                 console.error(err)
@@ -50,37 +49,57 @@ const ListStories = ({ idRoom }: Props) => {
         },
     })
 
+    const handleCreateStory = () => {
+        setShowModalCreateStory(true)
+    }
+
     useEffect(() => {
-        const getStories = async () => {
-            const storiesRef = doc(db, 'rooms', idRoom)
-            onSnapshot(storiesRef, (doc) => {
-                const storiesList = doc.data()?.stories
-                console.log(storiesList)
-                setStories(storiesList)
-            })
-        }
-        getStories()
+        const storiesRef = collection(db, 'rooms', idRoom, 'stories')
+        const unsub = onSnapshot(storiesRef, (querySnapshot) => {
+            const storiesList = querySnapshot.docs.map((doc) => ({
+                ...doc.data(),
+                id: doc.id,
+            }))
+            setStories(storiesList)
+        })
+        return () => unsub()
     }, [idRoom])
 
     return (
         <>
             <div>
                 {stories.map((story) => (
-                    <li key={story.id}>{story.title}</li>
+                    <li
+                        key={story.id}
+                        className={`hover:font-bold hover:cursor-pointer ${
+                            story.id === selectedStoryId && 'font-bold'
+                        }`}
+                        onClick={() => selectStory(story.id)}
+                    >
+                        {story.title}{' '}
+                        <span className='text-sm text-dark-primary'>
+                            {story.estimation
+                                ? `${story.estimation} points`
+                                : 'Non estimée'}
+                        </span>
+                    </li>
                 ))}
             </div>
-            <form onSubmit={handleSubmit} className='flex justify-end'>
-                <input
-                    name='title'
-                    placeholder="Titre de l'US"
-                    onChange={handleChange}
-                    className='flex-1'
-                />
-                <button type='submit' className='primary ml-2'>
-                    +
-                </button>
-                {error && <p>{error}</p>}
-            </form>
+            <button className='primary' onClick={handleCreateStory}>
+                Créer une story
+            </button>
+            {showModalCreateStory &&
+                createPortal(
+                    <>
+                        <AddStoryModal
+                            handleSubmit={handleSubmit}
+                            handleChange={handleChange}
+                            error={error}
+                            onClose={() => setShowModalCreateStory(false)}
+                        />
+                    </>,
+                    document.body
+                )}
         </>
     )
 }
