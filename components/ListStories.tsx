@@ -9,6 +9,8 @@ import {
 import { firebaseConfig } from '@/firebase.config'
 import { useEffect, useState } from 'react'
 import { useFormik } from 'formik'
+import { createPortal } from 'react-dom'
+import AddStoryModal from './AddStoryModal'
 
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
@@ -21,6 +23,8 @@ interface Props {
 const ListStories = ({ idRoom, selectStory }: Props) => {
     const [stories, setStories] = useState<DocumentData[]>([])
     const [error, setError] = useState<string>()
+    const [showModalCreateStory, setShowModalCreateStory] =
+        useState<boolean>(false)
 
     const { handleChange, handleSubmit } = useFormik({
         initialValues: {
@@ -35,6 +39,7 @@ const ListStories = ({ idRoom, selectStory }: Props) => {
                 }
                 await addDoc(storiesRef, newStory)
                 setError(undefined)
+                setShowModalCreateStory(false)
                 resetForm()
             } catch (err) {
                 console.error(err)
@@ -42,6 +47,10 @@ const ListStories = ({ idRoom, selectStory }: Props) => {
             }
         },
     })
+
+    const handleCreateStory = () => {
+        setShowModalCreateStory(true)
+    }
 
     useEffect(() => {
         const storiesRef = collection(db, 'rooms', idRoom, 'stories')
@@ -68,18 +77,21 @@ const ListStories = ({ idRoom, selectStory }: Props) => {
                     </li>
                 ))}
             </div>
-            <form onSubmit={handleSubmit} className='flex justify-end'>
-                <input
-                    name='title'
-                    placeholder="Titre de l'US"
-                    onChange={handleChange}
-                    className='flex-1'
-                />
-                <button type='submit' className='primary ml-2'>
-                    +
-                </button>
-                {error && <p>{error}</p>}
-            </form>
+            <button className='primary' onClick={handleCreateStory}>
+                Créer une story
+            </button>
+            {showModalCreateStory &&
+                createPortal(
+                    <>
+                        <AddStoryModal
+                            handleSubmit={handleSubmit}
+                            handleChange={handleChange}
+                            error={error}
+                            onClose={() => setShowModalCreateStory(false)}
+                        />
+                    </>,
+                    document.body
+                )}
         </>
     )
 }

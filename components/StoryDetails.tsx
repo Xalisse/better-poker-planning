@@ -23,7 +23,7 @@ const StoryDetails = ({ storyId, idRoom }: Props) => {
 
     return (
         <div>
-            <p>{story?.title}</p>
+            <p className='text-lg font-bold'>{story?.title}</p>
             <div>{story?.description}</div>
         </div>
     )
