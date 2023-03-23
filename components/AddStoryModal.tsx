@@ -15,22 +15,26 @@ const AddStoryModal = ({
 }: Props) => {
     return (
         <ModalLayout>
-            <input
-                name='title'
-                placeholder="Titre de l'US"
-                onChange={handleChange}
-                className='flex-1'
-            />
-            {error && <p>{error}</p>}
-            <button
-                className='border-2 border-dark-secondary !bg-opacity-0 text-dark-secondary mx-2'
-                onClick={onClose}
-            >
-                Annuler
-            </button>
-            <button onClick={handleSubmit} className='primary mx-2'>
-                Ajouter
-            </button>
+            <div className='flex flex-col h-full justify-between'>
+                <p className='text-lg font-bold'>Créer une user story</p>
+                <input
+                    name='title'
+                    placeholder="Titre de l'US"
+                    onChange={handleChange}
+                />
+                {error && <p>{error}</p>}
+                <div className='flex self-end'>
+                    <button
+                        className='border-2 border-dark-secondary !bg-opacity-0 text-dark-secondary mx-4'
+                        onClick={onClose}
+                    >
+                        Annuler
+                    </button>
+                    <button onClick={handleSubmit} className='primary'>
+                        Ajouter
+                    </button>
+                </div>
+            </div>
         </ModalLayout>
     )
 }

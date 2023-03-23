@@ -1,13 +1,7 @@
 import { firebaseConfig } from '@/firebase.config'
 import Story from '@/models/story.model'
 import { initializeApp } from 'firebase/app'
-import {
-    getFirestore,
-    collection,
-    addDoc,
-    setDoc,
-    doc,
-} from 'firebase/firestore'
+import { getFirestore, setDoc, doc } from 'firebase/firestore'
 import Papa from 'papaparse'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -34,21 +28,35 @@ const ImportCsv = ({ onClose, idRoom }: Props) => {
             header: true,
             skipEmptyLines: true,
             complete: (results) => {
-                console.log('results: ', results)
-                if (results.errors)
-                    setWarning(results.errors.map((err) => err.message))
-                if (results.data) {
-                    console.log(Object.hasOwn(results.data[0], 'id'))
-                    setPreviewData(
-                        results.data.filter(
-                            (story) =>
-                                Object.hasOwn(story, 'id') &&
-                                Object.hasOwn(story, 'title') &&
-                                Object.hasOwn(story, 'estimation') &&
-                                Object.hasOwn(story, 'description')
-                        )
-                    )
+                const someStoriesBadFormat = results.data.some(
+                    (story) =>
+                        !Object.hasOwn(story, 'id') ||
+                        !Object.hasOwn(story, 'title') ||
+                        !Object.hasOwn(story, 'estimation') ||
+                        !Object.hasOwn(story, 'description')
+                )
+                if (someStoriesBadFormat) {
+                    setWarning([
+                        "Certaines user stories n'ont pas le bon format. Les champs id, title, description et estimation sont obligatoires.",
+                    ])
                 }
+
+                const goodFormatStories = results.data.filter(
+                    (story) =>
+                        Object.hasOwn(story, 'id') &&
+                        Object.hasOwn(story, 'title') &&
+                        Object.hasOwn(story, 'estimation') &&
+                        Object.hasOwn(story, 'description')
+                )
+                if (goodFormatStories.length > 0) {
+                    setPreviewData(goodFormatStories)
+                }
+
+                if (results.errors)
+                    setWarning((old) => {
+                        const warns = results.errors.map((err) => err.message)
+                        return old ? [...old, ...warns] : warns
+                    })
                 setLoading(false)
             },
             error: (err) => {
@@ -59,10 +67,16 @@ const ImportCsv = ({ onClose, idRoom }: Props) => {
         })
     }
 
+    const handleChangeFile = (file: File) => {
+        setFile(file)
+        setPreviewData(undefined)
+        setWarning(undefined)
+        setError(undefined)
+    }
+
     const handleImportData = async (stories: Story[]) => {
         setLoading(true)
         const addStoriesPromises = stories.map((story) => {
-            console.log(story)
             if (!story || !story.id) return
             const storyRef = doc(db, 'rooms', idRoom, 'stories', story.id)
             return setDoc(storyRef, story)
@@ -74,49 +88,74 @@ const ImportCsv = ({ onClose, idRoom }: Props) => {
     }
 
     return (
-        <>
-            <p>Import de stories</p>
-            <input
-                type='file'
-                accept='.csv'
-                name='file'
-                onChange={(e) => e.target.files && setFile(e.target.files[0])}
-            />
-            <button
-                onClick={handleTransformCsv}
-                disabled={!file}
-                className='primary'
-            >
-                Prévisualiser
-            </button>
+        <div className='flex flex-col h-full justify-between p-4'>
+            <div>
+                <p className='text-lg font-bold'>Import de stories</p>
+                <p className='text-tertiary'>
+                    Le fichier doit être au format csv et avoir les entêtes
+                    suivantes : id, title, description, estimation
+                </p>
 
+                <div
+                    className='flex justify-center mt-8'
+                    style={{ alignItems: 'stretch' }}
+                >
+                    <input
+                        type='file'
+                        accept='.csv'
+                        name='file'
+                        className='border-dark-secondary'
+                        onChange={(e) =>
+                            e.target.files &&
+                            handleChangeFile(e.target.files[0])
+                        }
+                    />
+                    <button
+                        onClick={handleTransformCsv}
+                        disabled={!file}
+                        className='primary ml-4'
+                    >
+                        Prévisualiser
+                    </button>
+                </div>
+            </div>
             {error && <p>{error}</p>}
             {warning && warning.map((err) => <p key={err}>{err}</p>)}
-
-            {previewData &&
-                previewData.map((story) => (
-                    <div key={story.id}>
-                        <p>{story.title}</p>
-                        <p>{story.estimation}</p>
-                    </div>
-                ))}
-
             {loading && <p>Chargement...</p>}
 
-            <button
-                onClick={onClose}
-                className='border-2 border-dark-secondary !bg-opacity-0 text-dark-secondary mx-2'
-            >
-                Annuler
-            </button>
-            <button
-                onClick={() => previewData && handleImportData(previewData)}
-                className='primary'
-                disabled={!previewData || !!error}
-            >
-                Importer
-            </button>
-        </>
+            {previewData && (
+                <div className='text-left'>
+                    {previewData.map((story) => (
+                        <li key={story.id}>
+                            {story.id}
+                            {' - '}
+                            {story.title}
+                            <span className='text-sm text-primary ml-2'>
+                                {story.estimation
+                                    ? `${story.estimation} points`
+                                    : 'Non estimée'}
+                            </span>
+                        </li>
+                    ))}
+                </div>
+            )}
+
+            <div>
+                <button
+                    onClick={onClose}
+                    className='border-2 border-dark-secondary !bg-opacity-0 text-dark-secondary mx-2'
+                >
+                    Annuler
+                </button>
+                <button
+                    onClick={() => previewData && handleImportData(previewData)}
+                    className='primary'
+                    disabled={!previewData || !!error}
+                >
+                    Importer
+                </button>
+            </div>
+        </div>
     )
 }
 
