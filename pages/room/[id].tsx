@@ -14,9 +14,17 @@ import { createPortal } from 'react-dom'
 import ChangeName from '@/components/ChangeName'
 import ListStories from '@/components/ListStories'
 import StoryDetails from '@/components/StoryDetails'
-import { doc, DocumentData, getFirestore, onSnapshot } from 'firebase/firestore'
+import {
+    doc,
+    DocumentData,
+    getDoc,
+    getFirestore,
+    onSnapshot,
+    updateDoc,
+} from 'firebase/firestore'
 import { initializeApp } from 'firebase/app'
 import { firebaseConfig } from '@/firebase.config'
+import { useFormik } from 'formik'
 
 type CardValueType = number | string | undefined
 
@@ -106,6 +114,30 @@ export default function Room() {
         return total / voting
     }
 
+    const {
+        handleChange: handleChangeEstimation,
+        handleSubmit: handleSaveEstimation,
+        setFieldValue: setEstimationValue,
+        values: valuesEstimation,
+    } = useFormik({
+        initialValues: {
+            value: '',
+        },
+        onSubmit: async ({ value }) => {
+            if (!selectedStoryId || !value) return
+            // save estimation to firebase
+            const storyRef = doc(
+                db,
+                'rooms',
+                `${id}`,
+                'stories',
+                selectedStoryId
+            )
+            await updateDoc(storyRef, { estimation: value })
+            toast.success('Éstimation sauvegardée 🪩')
+        },
+    })
+
     const handleChooseValue = (card: string | number) => {
         if (!currentUser) return
         setCurrentCard(card)
@@ -127,6 +159,7 @@ export default function Room() {
     const handleFlipCards = () => {
         setIsFlipped(!isFlipped)
         postFlipCards(!isFlipped, idRoom)
+        setEstimationValue('value', average())
     }
 
     const handleChangeName = (name: string) => {
@@ -441,16 +474,30 @@ export default function Room() {
                                 )}
                                 <button
                                     onClick={handleFlipCards}
-                                    className='row-start-2'
+                                    className='row-start-2 m-2 primary'
                                 >
                                     {isFlipped
                                         ? 'Nouvelle estimation'
                                         : 'Retourner les cartes'}
                                 </button>
                                 {isFlipped && (
-                                    <div className='row-start-3'>
-                                        Moyenne : {average()}
-                                    </div>
+                                    <form
+                                        className='row-start-3'
+                                        onSubmit={handleSaveEstimation}
+                                    >
+                                        Estimation :{' '}
+                                        <input
+                                            name='value'
+                                            onChange={handleChangeEstimation}
+                                            value={valuesEstimation.value}
+                                        />
+                                        <button
+                                            className='primary m-2'
+                                            type='submit'
+                                        >
+                                            Sauvegarder
+                                        </button>
+                                    </form>
                                 )}
                             </div>
                             <div className='col-start-1 col-end-4 row-start-1 flex flex-row justify-center items-center gap-12'>
