@@ -14,8 +14,14 @@ import { createPortal } from 'react-dom'
 import ChangeName from '@/components/ChangeName'
 import ListStories from '@/components/ListStories'
 import StoryDetails from '@/components/StoryDetails'
+import { doc, DocumentData, getFirestore, onSnapshot } from 'firebase/firestore'
+import { initializeApp } from 'firebase/app'
+import { firebaseConfig } from '@/firebase.config'
 
 type CardValueType = number | string | undefined
+
+const app = initializeApp(firebaseConfig)
+const db = getFirestore(app)
 
 const postCardChoosen = (card: number | string, user: User, idRoom: string) => {
     return postMsg({ cardValue: card, user }, idRoom, 'card-choosen')
@@ -56,7 +62,8 @@ export default function Room() {
     const currentUserRef = useRef(currentUser)
     const connectedUsersRef = useRef(connectedUsers)
     const [showUS, setShowUS] = useState<boolean>(false)
-    const [selectedStory, setSelectedStory] = useState<string>()
+    const [selectedStoryId, setSelectedStoryId] = useState<string>()
+    const [selectedStory, setSelectedStory] = useState<DocumentData>()
 
     const northUser: { user: User; cardValue: CardValueType }[] = []
     const eastUser: { user: User; cardValue: CardValueType }[] = []
@@ -153,10 +160,18 @@ export default function Room() {
     }
 
     const handleSelectStory = (storyId: string) => {
-        console.log(storyId)
-        setSelectedStory(storyId)
+        setSelectedStoryId(storyId)
         postSelectedStory(storyId, idRoom)
     }
+
+    useEffect(() => {
+        if (!selectedStoryId) return
+        const storyRef = doc(db, 'rooms', `${id}`, 'stories', selectedStoryId)
+        const unsub = onSnapshot(storyRef, (doc) => {
+            setSelectedStory(doc.data())
+        })
+        return () => unsub()
+    }, [selectedStoryId, id])
 
     useEffect(() => {
         currentUserRef.current = currentUser
@@ -330,7 +345,7 @@ export default function Room() {
         })
         chanel.bind('selected-story', ({ storyId }: { storyId: string }) => {
             console.log('selected-story event', storyId)
-            setSelectedStory(storyId)
+            setSelectedStoryId(storyId)
         })
         if (pusher) {
             pusher.disconnect()
@@ -421,6 +436,9 @@ export default function Room() {
                     <>
                         <div className='grid grid-cols-[1fr,3fr,1fr] grid-rows-[2fr,3fr,2fr] w-2/3 self-center py-10 gap-4'>
                             <div className='grid grid-rows-3 bg-light-secondary w-full h-full m-auto items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
+                                {selectedStory && (
+                                    <div>{selectedStory.title}</div>
+                                )}
                                 <button
                                     onClick={handleFlipCards}
                                     className='row-start-2'
@@ -551,10 +569,9 @@ export default function Room() {
                         </button>
                         <div className='absolute right-0 top-[15%] h-[70%] w-2/5'>
                             <div className='rounded-l-xl bg-white border-2 border-r-0 border-dark-tertiary h-full p-5 text-left overflow-auto flex flex-col justify-between'>
-                                {selectedStory && (
+                                {selectedStoryId && (
                                     <StoryDetails
-                                        storyId={selectedStory}
-                                        idRoom={`${id}`}
+                                        story={selectedStory as any}
                                     />
                                 )}
                                 <ListStories
