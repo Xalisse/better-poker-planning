@@ -12,30 +12,31 @@ const ChangeName = ({ name, onClose, onValidate }: Props) => {
 
     return (
         <ModalLayout>
-            <p className='text-xl'>Modifier mon nom</p>
-            <input
-                type='text'
-                defaultValue={name}
-                name='newName'
-                onChange={(e) => setNewName(e.target.value)}
-                className='row-start-2'
-            />
-            <div className='flex row-start-3 self-end justify-end'>
-                <button
-                    onClick={onClose}
-                    className='border-2 border-dark-secondary !bg-opacity-0 text-dark-secondary mx-4'
-                >
-                    Cancel
-                </button>
-                <button
-                    onClick={(e) => {
-                        e.preventDefault()
-                        onValidate(newName)
-                    }}
-                    className='primary'
-                >
-                    Validate
-                </button>
+            <div className='flex flex-col justify-between h-full'>
+                <p className='text-lg font-bold'>Modifier mon nom</p>
+                <input
+                    type='text'
+                    defaultValue={name}
+                    name='newName'
+                    onChange={(e) => setNewName(e.target.value)}
+                />
+                <div className='flex self-end justify-end'>
+                    <button
+                        onClick={onClose}
+                        className='border-2 border-dark-secondary !bg-opacity-0 text-dark-secondary mx-4'
+                    >
+                        Annuler
+                    </button>
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault()
+                            onValidate(newName)
+                        }}
+                        className='primary'
+                    >
+                        Valider
+                    </button>
+                </div>
             </div>
         </ModalLayout>
     )
