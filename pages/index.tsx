@@ -2,6 +2,11 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import { initializeApp } from 'firebase/app'
+import { getFirestore, addDoc, collection } from 'firebase/firestore'
+import { firebaseConfig } from '@/firebase.config'
+
+const app = initializeApp(firebaseConfig)
 
 export default function Home() {
     const router = useRouter()
@@ -13,6 +18,8 @@ export default function Home() {
             'currentRoom',
             JSON.stringify({ idRoom, roomName })
         )
+        const db = getFirestore(app)
+        addDoc(collection(db, 'rooms'), { id: idRoom, name: roomName })
         router.push(
             `/room/${idRoom}?routeName=${roomName?.replaceAll(' ', '-')}`
         )

@@ -12,6 +12,13 @@ import { FiCopy } from 'react-icons/fi'
 import { toast } from 'sonner'
 import { createPortal } from 'react-dom'
 import ChangeName from '@/components/ChangeName'
+import { initializeApp } from 'firebase/app'
+import { getFirestore, collection } from 'firebase/firestore'
+import { firebaseConfig } from '@/firebase.config'
+import ListStories from '@/components/ListStories'
+
+const app = initializeApp(firebaseConfig)
+const db = getFirestore(app)
 
 type CardValueType = number | string | undefined
 
@@ -49,6 +56,7 @@ export default function Room() {
         useState<boolean>(false)
     const currentUserRef = useRef(currentUser)
     const connectedUsersRef = useRef(connectedUsers)
+    const [showUS, setShowUS] = useState<boolean>(false)
 
     const northUser: { user: User; cardValue: CardValueType }[] = []
     const eastUser: { user: User; cardValue: CardValueType }[] = []
@@ -413,16 +421,7 @@ export default function Room() {
                                 </button>
                                 {isFlipped && (
                                     <div className='row-start-3'>
-                                        Moyenne :{' '}
-                                        {cards.length > 0 &&
-                                            cards.reduce(
-                                                (acc, c) =>
-                                                    typeof c.cardValue ===
-                                                    'string'
-                                                        ? acc
-                                                        : acc + c.cardValue,
-                                                0
-                                            ) / cards.length}
+                                        Moyenne : {average()}
                                     </div>
                                 )}
                             </div>
@@ -476,7 +475,6 @@ export default function Room() {
                                     >
                                         Mode spectateur 👁️
                                     </span>
-                                    <p className='my-2'>Choisis une carte</p>
                                     <div className='flex justify-around max-w-4xl m-auto'>
                                         {[
                                             1,
@@ -505,6 +503,9 @@ export default function Room() {
                                             />
                                         ))}
                                     </div>
+                                    <div className='mt-2 p-4 rounded-t-full w-1/5 bg-light-secondary'>
+                                        Choisis une carte
+                                    </div>
                                 </>
                             )}
                             {currentUser.isSpectator && (
@@ -521,6 +522,31 @@ export default function Room() {
                     </>
                 )}
             </div>
+
+            <button
+                className='absolute top-[15%] right-0 rounded-r-none'
+                onClick={() => setShowUS(true)}
+            >
+                {'< '}US
+            </button>
+
+            {showUS &&
+                createPortal(
+                    <>
+                        <button
+                            onClick={() => setShowUS(false)}
+                            className='absolute right-[40%] top-[17%] rounded-r-none text-dark-tertiary !bg-white border-2 border-r-0 border-dark-tertiary'
+                        >
+                            {' >'}
+                        </button>
+                        <div className='absolute right-0 top-[15%] h-[70%] w-2/5'>
+                            <div className='rounded-l-xl bg-white border-2 border-r-0 border-dark-tertiary h-full p-5 text-left overflow-auto flex flex-col justify-between'>
+                                <ListStories idRoom={`${id}`} />
+                            </div>
+                        </div>
+                    </>,
+                    document.body
+                )}
         </>
     )
 }
