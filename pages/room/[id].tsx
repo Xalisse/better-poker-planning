@@ -12,13 +12,8 @@ import { FiCopy } from 'react-icons/fi'
 import { toast } from 'sonner'
 import { createPortal } from 'react-dom'
 import ChangeName from '@/components/ChangeName'
-import { initializeApp } from 'firebase/app'
-import { getFirestore, collection } from 'firebase/firestore'
-import { firebaseConfig } from '@/firebase.config'
 import ListStories from '@/components/ListStories'
-
-const app = initializeApp(firebaseConfig)
-const db = getFirestore(app)
+import StoryDetails from '@/components/StoryDetails'
 
 type CardValueType = number | string | undefined
 
@@ -42,6 +37,10 @@ const postUserChanged = (user: User, idRoom: string) => {
     return postMsg({ user }, idRoom, 'user-changed')
 }
 
+const postSelectedStory = (storyId: string, idRoom: string) => {
+    return postMsg({ storyId }, idRoom, 'selected-story')
+}
+
 export default function Room() {
     const router = useRouter()
     const { id, routeName } = router.query
@@ -57,6 +56,7 @@ export default function Room() {
     const currentUserRef = useRef(currentUser)
     const connectedUsersRef = useRef(connectedUsers)
     const [showUS, setShowUS] = useState<boolean>(false)
+    const [selectedStory, setSelectedStory] = useState<string>()
 
     const northUser: { user: User; cardValue: CardValueType }[] = []
     const eastUser: { user: User; cardValue: CardValueType }[] = []
@@ -150,6 +150,12 @@ export default function Room() {
             postUserChanged({ ...old, isSpectator: !old.isSpectator }, idRoom)
             return { ...old, isSpectator: !old.isSpectator }
         })
+    }
+
+    const handleSelectStory = (storyId: string) => {
+        console.log(storyId)
+        setSelectedStory(storyId)
+        postSelectedStory(storyId, idRoom)
     }
 
     useEffect(() => {
@@ -321,6 +327,10 @@ export default function Room() {
                     oldCards.filter((c) => c.user.id !== user.id)
                 )
             }
+        })
+        chanel.bind('selected-story', ({ storyId }: { storyId: string }) => {
+            console.log('selected-story event', storyId)
+            setSelectedStory(storyId)
         })
         if (pusher) {
             pusher.disconnect()
@@ -541,7 +551,16 @@ export default function Room() {
                         </button>
                         <div className='absolute right-0 top-[15%] h-[70%] w-2/5'>
                             <div className='rounded-l-xl bg-white border-2 border-r-0 border-dark-tertiary h-full p-5 text-left overflow-auto flex flex-col justify-between'>
-                                <ListStories idRoom={`${id}`} />
+                                {selectedStory && (
+                                    <StoryDetails
+                                        storyId={selectedStory}
+                                        idRoom={`${id}`}
+                                    />
+                                )}
+                                <ListStories
+                                    idRoom={`${id}`}
+                                    selectStory={handleSelectStory}
+                                />
                             </div>
                         </div>
                     </>,

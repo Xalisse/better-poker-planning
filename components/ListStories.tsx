@@ -2,14 +2,12 @@ import { initializeApp } from 'firebase/app'
 import {
     getFirestore,
     DocumentData,
-    doc,
-    getDoc,
-    setDoc,
     onSnapshot,
+    collection,
+    addDoc,
 } from 'firebase/firestore'
 import { firebaseConfig } from '@/firebase.config'
-import { FormEventHandler, useEffect, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
+import { useEffect, useState } from 'react'
 import { useFormik } from 'formik'
 
 const app = initializeApp(firebaseConfig)
@@ -17,9 +15,10 @@ const db = getFirestore(app)
 
 interface Props {
     idRoom: string
+    selectStory: (id: string) => void
 }
 
-const ListStories = ({ idRoom }: Props) => {
+const ListStories = ({ idRoom, selectStory }: Props) => {
     const [stories, setStories] = useState<DocumentData[]>([])
     const [error, setError] = useState<string>()
 
@@ -30,17 +29,11 @@ const ListStories = ({ idRoom }: Props) => {
         onSubmit: async ({ title }, { resetForm }) => {
             if (!title) return setError('Le titre est obligatoire')
             try {
-                const storiesRef = doc(db, 'rooms', idRoom)
-                const storiesSnapshot = await getDoc(storiesRef)
-                const storiesList = storiesSnapshot.data()?.stories
+                const storiesRef = collection(db, 'rooms', idRoom, 'stories')
                 const newStory = {
-                    id: uuidv4(),
                     title,
                 }
-                const newStories = [...storiesList, newStory]
-                await setDoc(storiesRef, {
-                    stories: newStories,
-                })
+                await addDoc(storiesRef, newStory)
                 setError(undefined)
                 resetForm()
             } catch (err) {
@@ -51,22 +44,28 @@ const ListStories = ({ idRoom }: Props) => {
     })
 
     useEffect(() => {
-        const getStories = async () => {
-            const storiesRef = doc(db, 'rooms', idRoom)
-            onSnapshot(storiesRef, (doc) => {
-                const storiesList = doc.data()?.stories
-                console.log(storiesList)
-                setStories(storiesList)
-            })
-        }
-        getStories()
+        const storiesRef = collection(db, 'rooms', idRoom, 'stories')
+        const unsub = onSnapshot(storiesRef, (querySnapshot) => {
+            const storiesList = querySnapshot.docs.map((doc) => ({
+                ...doc.data(),
+                id: doc.id,
+            }))
+            setStories(storiesList)
+        })
+        return () => unsub()
     }, [idRoom])
 
     return (
         <>
             <div>
                 {stories.map((story) => (
-                    <li key={story.id}>{story.title}</li>
+                    <li
+                        key={story.id}
+                        className='hover:font-bold hover:cursor-pointer'
+                        onClick={() => selectStory(story.id)}
+                    >
+                        {story.title}
+                    </li>
                 ))}
             </div>
             <form onSubmit={handleSubmit} className='flex justify-end'>
