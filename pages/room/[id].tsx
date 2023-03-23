@@ -610,21 +610,32 @@ export default function Room() {
                     <>
                         <button
                             onClick={() => setShowUS(false)}
-                            className='absolute right-[40%] top-[17%] rounded-r-none text-dark-tertiary !bg-white border-2 border-r-0 border-dark-tertiary'
+                            className='absolute right-[33%] top-[17%] rounded-r-none text-dark-tertiary !bg-white border-2 border-r-0 border-dark-tertiary'
                         >
                             {' >'}
                         </button>
-                        <div className='absolute right-0 top-[15%] h-[70%] w-2/5'>
+                        <div className='absolute right-0 top-[15%] h-[70%] w-1/3'>
                             <div className='rounded-l-xl bg-white border-2 border-r-0 border-dark-tertiary h-full p-5 text-left overflow-auto flex flex-col justify-between'>
                                 {selectedStoryId && (
-                                    <StoryDetails
-                                        story={selectedStory as any}
-                                    />
+                                    <div>
+                                        <p className='text-lg italic'>
+                                            En cours d&apos;estimation
+                                        </p>
+                                        <StoryDetails
+                                            story={selectedStory as any}
+                                        />
+                                    </div>
                                 )}
-                                <ListStories
-                                    idRoom={`${id}`}
-                                    selectStory={handleSelectStory}
-                                />
+                                <div>
+                                    <p className='text-lg italic'>
+                                        Toutes les user stories
+                                    </p>
+                                    <ListStories
+                                        idRoom={`${id}`}
+                                        selectedStoryId={selectedStoryId}
+                                        selectStory={handleSelectStory}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </>,

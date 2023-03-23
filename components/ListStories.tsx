@@ -17,10 +17,11 @@ const db = getFirestore(app)
 
 interface Props {
     idRoom: string
+    selectedStoryId?: string
     selectStory: (id: string) => void
 }
 
-const ListStories = ({ idRoom, selectStory }: Props) => {
+const ListStories = ({ idRoom, selectStory, selectedStoryId }: Props) => {
     const [stories, setStories] = useState<DocumentData[]>([])
     const [error, setError] = useState<string>()
     const [showModalCreateStory, setShowModalCreateStory] =
@@ -70,10 +71,17 @@ const ListStories = ({ idRoom, selectStory }: Props) => {
                 {stories.map((story) => (
                     <li
                         key={story.id}
-                        className='hover:font-bold hover:cursor-pointer'
+                        className={`hover:font-bold hover:cursor-pointer ${
+                            story.id === selectedStoryId && 'font-bold'
+                        }`}
                         onClick={() => selectStory(story.id)}
                     >
-                        {story.title}
+                        {story.title}{' '}
+                        <span className='text-sm text-dark-primary'>
+                            {story.estimation
+                                ? `${story.estimation} points`
+                                : 'Non estimée'}
+                        </span>
                     </li>
                 ))}
             </div>
