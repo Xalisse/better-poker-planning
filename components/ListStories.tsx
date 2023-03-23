@@ -11,6 +11,9 @@ import { useEffect, useState } from 'react'
 import { useFormik } from 'formik'
 import { createPortal } from 'react-dom'
 import AddStoryModal from './AddStoryModal'
+import ModalLayout from './ModalLayout'
+import ImportCsv from './ImportCsv'
+import Story from '@/models/story.model'
 
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
@@ -25,6 +28,8 @@ const ListStories = ({ idRoom, selectStory, selectedStoryId }: Props) => {
     const [stories, setStories] = useState<DocumentData[]>([])
     const [error, setError] = useState<string>()
     const [showModalCreateStory, setShowModalCreateStory] =
+        useState<boolean>(false)
+    const [showModalImportStories, setShowModalImportStories] =
         useState<boolean>(false)
 
     const { handleChange, handleSubmit } = useFormik({
@@ -48,10 +53,6 @@ const ListStories = ({ idRoom, selectStory, selectedStoryId }: Props) => {
             }
         },
     })
-
-    const handleCreateStory = () => {
-        setShowModalCreateStory(true)
-    }
 
     useEffect(() => {
         const storiesRef = collection(db, 'rooms', idRoom, 'stories')
@@ -85,8 +86,17 @@ const ListStories = ({ idRoom, selectStory, selectedStoryId }: Props) => {
                     </li>
                 ))}
             </div>
-            <button className='primary' onClick={handleCreateStory}>
+            <button
+                className='primary'
+                onClick={() => setShowModalCreateStory(true)}
+            >
                 Créer une story
+            </button>
+            <button
+                className='primary'
+                onClick={() => setShowModalImportStories(true)}
+            >
+                Importer des stories
             </button>
             {showModalCreateStory &&
                 createPortal(
@@ -98,6 +108,16 @@ const ListStories = ({ idRoom, selectStory, selectedStoryId }: Props) => {
                             onClose={() => setShowModalCreateStory(false)}
                         />
                     </>,
+                    document.body
+                )}
+            {showModalImportStories &&
+                createPortal(
+                    <ModalLayout width='w-2/3' height='h-2/3'>
+                        <ImportCsv
+                            onClose={() => setShowModalImportStories(false)}
+                            idRoom={idRoom}
+                        />
+                    </ModalLayout>,
                     document.body
                 )}
         </>
