@@ -1,4 +1,5 @@
 import User from '@/models/user.model'
+import { v4 as uuidv4 } from 'uuid'
 import {
     postCardChoosen,
     postDisconnectUser,
@@ -11,8 +12,8 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Pusher from 'pusher-js'
 import { useEffect, useRef, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
 import { FiCopy } from 'react-icons/fi'
+import { FcGoogle } from 'react-icons/fc'
 import { toast } from 'sonner'
 import { createPortal } from 'react-dom'
 import ChangeName from '@/components/ChangeName'
@@ -30,6 +31,7 @@ import { firebaseConfig } from '@/firebase.config'
 import PokerTable from '@/components/PokerTable'
 import PlayerHand from '@/components/PlayerHand'
 import { CardInterface, CardValueType } from '@/models/card.model'
+import { useSession, signIn, signOut } from 'next-auth/react'
 
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
@@ -52,22 +54,12 @@ export default function Room() {
     const [selectedStory, setSelectedStory] = useState<DocumentData>()
     const [isFlipped, setIsFlipped] = useState<boolean>(false)
 
+    const { data: session } = useSession()
+
     const handleChooseValue = (card: CardValueType) => {
         if (!currentUser || !card) return
         setCurrentCard(card)
         postCardChoosen(card, currentUser, idRoom)
-    }
-
-    const handleCreateUser = (e: any) => {
-        e.preventDefault()
-        const newUser = {
-            name: e.target.name.value,
-            id: uuidv4(),
-            isSpectator: false,
-        }
-        setCurrentUser(newUser)
-        setConnectedUsers((users) => [...users, newUser])
-        postUserConnected(newUser, idRoom)
     }
 
     const handleFlipCards = (isFlipped: boolean) => {
@@ -77,11 +69,13 @@ export default function Room() {
 
     const handleChangeName = (name: string) => {
         if (!currentUser) return
-        setCurrentUser((user) => ({
-            id: user?.id || '',
-            name,
-            isSpectator: user?.isSpectator || false,
-        }))
+        setCurrentUser(
+            (user) =>
+                ({
+                    ...user,
+                    name,
+                } as User)
+        )
         setConnectedUsers((users) => {
             const index = users.findIndex((u) => u.id === currentUser.id)
             users[index].name = name
@@ -128,6 +122,19 @@ export default function Room() {
         }
         pusher?.disconnect()
     }
+
+    useEffect(() => {
+        if (!session || !session.user) {
+            setCurrentUser(undefined)
+        } else {
+            setCurrentUser({
+                id: session.user.email || uuidv4(),
+                name: session.user.name,
+                picture: session.user.image,
+                isSpectator: false,
+            })
+        }
+    }, [session])
 
     useEffect(() => {
         if (!selectedStoryId) return
@@ -309,21 +316,24 @@ export default function Room() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id])
 
+    if (!session) {
+        return (
+            <button
+                onClick={() => signIn('google')}
+                className='flex items-center gap-4 m-auto mt-8'
+            >
+                <FcGoogle /> Se connecter
+            </button>
+        )
+    }
+
     return (
         <>
             <Head>
                 <title>{routeName} - Better Poker Planning 🦄</title>
             </Head>
-            <div className='w-full h-full flex flex-col justify-between pb-4'>
-                <div className='grid grid-cols-[1fr,4fr,1fr] pt-2'>
-                    <div
-                        className='pl-4 flex justify-left items-center cursor-pointer text-5xl'
-                        onClick={() => router.push('/')}
-                    >
-                        <span className='transition-all hover:scale-110'>
-                            🦄
-                        </span>
-                    </div>
+            <div className='w-full h-full flex flex-col pb-4'>
+                <div className='pt-2'>
                     <div className=''>
                         <h1>{routeName}</h1>
                         {currentUser && (
@@ -366,21 +376,6 @@ export default function Room() {
                         </div>
                     )}
                 </div>
-
-                {!currentUser && (
-                    <div className='flex flex-col m-auto gap-4'>
-                        <div>Saisissez votre nom d&apos;utilisateur</div>
-                        <form
-                            onSubmit={handleCreateUser}
-                            className='flex gap-4'
-                        >
-                            <input name='name'></input>
-                            <button type='submit' className='primary'>
-                                Valider
-                            </button>
-                        </form>
-                    </div>
-                )}
 
                 {currentUser && (
                     <>

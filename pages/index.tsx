@@ -31,7 +31,6 @@ export default function Home() {
                 <title>Better Poker Planning 🦄</title>
             </Head>
             <div className='pt-6'>
-                <h1 className='mb-44'>Better Poker planning</h1>
                 <form
                     onSubmit={handleNewRoom}
                     className='flex flex-col items-center gap-4'

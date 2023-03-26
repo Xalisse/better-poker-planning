@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "next dev",
+        "dev": "next dev -p 3001",
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
@@ -19,6 +19,7 @@
         "firebase": "^9.18.0",
         "formik": "^2.2.9",
         "next": "13.1.2",
+        "next-auth": "^4.20.1",
         "papaparse": "^5.4.1",
         "pusher": "^5.1.2",
         "pusher-js": "^8.0.1",
