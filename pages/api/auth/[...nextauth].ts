@@ -1,14 +1,42 @@
-import NextAuth, { Session } from 'next-auth'
+import NextAuth from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
+import { FirestoreAdapter } from '@next-auth/firebase-adapter'
+import { db } from '@/firebase.config'
+import * as firestoreFunction from 'firebase/firestore'
+import { getAuth } from 'firebase-admin/auth'
+import { cert } from 'firebase-admin/app'
 
 export const authOptions = {
-    // Configure one or more authentication providers
+    adapter: FirestoreAdapter({
+        credential: cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_PRIVATE_KEY,
+        }),
+        db,
+        ...firestoreFunction,
+    } as any),
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_ID_AUTH || '',
             clientSecret: process.env.GOOGLE_SECRET_AUTH || '',
         }),
     ],
+    session: { strategy: 'jwt' as 'jwt' },
+    callbacks: {
+        async jwt({ token, user }: any) {
+            if (user) {
+                token.customToken = await getAuth().createCustomToken(user.id)
+            }
+            return token
+        },
+        session: async ({ session, token }: any) => {
+            return {
+                ...session,
+                customToken: token.customToken,
+            }
+        },
+    },
 }
 
 export default NextAuth(authOptions)

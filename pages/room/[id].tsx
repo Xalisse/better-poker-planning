@@ -13,28 +13,17 @@ import { useRouter } from 'next/router'
 import Pusher from 'pusher-js'
 import { useEffect, useRef, useState } from 'react'
 import { FiCopy } from 'react-icons/fi'
-import { FcGoogle } from 'react-icons/fc'
 import { toast } from 'sonner'
 import { createPortal } from 'react-dom'
 import ChangeName from '@/components/ChangeName'
 import ListStories from '@/components/ListStories'
 import StoryDetails from '@/components/StoryDetails'
-import {
-    doc,
-    DocumentData,
-    getFirestore,
-    onSnapshot,
-    updateDoc,
-} from 'firebase/firestore'
-import { initializeApp } from 'firebase/app'
-import { firebaseConfig } from '@/firebase.config'
+import { doc, DocumentData, onSnapshot, updateDoc } from 'firebase/firestore'
+import { db } from '@/firebase.config'
 import PokerTable from '@/components/PokerTable'
 import PlayerHand from '@/components/PlayerHand'
 import { CardInterface, CardValueType } from '@/models/card.model'
-import { useSession, signIn, signOut } from 'next-auth/react'
-
-const app = initializeApp(firebaseConfig)
-const db = getFirestore(app)
+import { useSession } from 'next-auth/react'
 
 export default function Room() {
     const router = useRouter()
@@ -315,17 +304,6 @@ export default function Room() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id])
-
-    if (!session) {
-        return (
-            <button
-                onClick={() => signIn('google')}
-                className='flex items-center gap-4 m-auto mt-8'
-            >
-                <FcGoogle /> Se connecter
-            </button>
-        )
-    }
 
     return (
         <>

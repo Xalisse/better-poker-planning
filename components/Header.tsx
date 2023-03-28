@@ -6,6 +6,12 @@ import { FiLogOut } from 'react-icons/fi'
 const Header = () => {
     const router = useRouter()
     const { data: session } = useSession()
+
+    const handleDeconnection = () => {
+        signOut({ redirect: false })
+        router.push('/')
+    }
+
     return (
         <nav className='grid grid-cols-3 p-1 border-b w-full items-center'>
             <span
@@ -19,7 +25,7 @@ const Header = () => {
             {session && (
                 <div
                     className='relative place-self-end self-center'
-                    onClick={() => signOut({ redirect: false })}
+                    onClick={handleDeconnection}
                 >
                     <Image
                         src={session?.user?.image || ''}

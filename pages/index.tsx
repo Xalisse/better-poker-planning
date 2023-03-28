@@ -2,14 +2,14 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import { initializeApp } from 'firebase/app'
-import { getFirestore, addDoc, collection } from 'firebase/firestore'
-import { firebaseConfig } from '@/firebase.config'
-
-const app = initializeApp(firebaseConfig)
+import { addDoc, collection } from 'firebase/firestore'
+import { db } from '@/firebase.config'
+import { signIn, useSession } from 'next-auth/react'
+import { FcGoogle } from 'react-icons/fc'
 
 export default function Home() {
     const router = useRouter()
+    const { data: session } = useSession()
     const [roomName, setRoomName] = useState<string>()
     const handleNewRoom = (event: any) => {
         event.preventDefault()
@@ -18,10 +18,24 @@ export default function Home() {
             'currentRoom',
             JSON.stringify({ idRoom, roomName })
         )
-        const db = getFirestore(app)
-        addDoc(collection(db, 'rooms'), { id: idRoom, name: roomName })
+        addDoc(collection(db, 'rooms'), {
+            id: idRoom,
+            name: roomName,
+            users: [session?.user?.email],
+        })
         router.push(
             `/room/${idRoom}?routeName=${roomName?.replaceAll(' ', '-')}`
+        )
+    }
+
+    if (!session) {
+        return (
+            <button
+                onClick={() => signIn('google', { callbackUrl: '/logged-in' })}
+                className='flex items-center gap-4 m-auto mt-8'
+            >
+                <FcGoogle /> Se connecter
+            </button>
         )
     }
 

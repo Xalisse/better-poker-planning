@@ -10,6 +10,7 @@
         "prepare": "husky install"
     },
     "dependencies": {
+        "@next-auth/firebase-adapter": "^2.0.1",
         "@next/font": "13.1.2",
         "@types/node": "18.11.18",
         "@types/react": "18.0.27",
@@ -17,7 +18,9 @@
         "eslint": "8.32.0",
         "eslint-config-next": "13.1.2",
         "firebase": "^9.18.0",
+        "firebase-admin": "^11.5.0",
         "formik": "^2.2.9",
+        "jsonwebtoken": "^9.0.0",
         "next": "13.1.2",
         "next-auth": "^4.20.1",
         "papaparse": "^5.4.1",
@@ -31,6 +34,7 @@
         "uuid": "^9.0.0"
     },
     "devDependencies": {
+        "@types/jsonwebtoken": "^9.0.1",
         "@types/papaparse": "^5.3.7",
         "@types/uuid": "^9.0.0",
         "autoprefixer": "^10.4.13",

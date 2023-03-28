@@ -2,6 +2,8 @@
 
 .eslintcache
 
+serviceaccount.json
+
 # dependencies
 /node_modules
 /.pnp
