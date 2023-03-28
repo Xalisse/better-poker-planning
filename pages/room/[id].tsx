@@ -313,6 +313,10 @@ export default function Room() {
         <>
             <Head>
                 <title>{routeName} - Better Poker Planning 🦄</title>
+                <meta
+                    property='og:image'
+                    content={`https://better-poker-planning-git-hvalette-og-xalisse.vercel.app/api/og?title=${routeName}`}
+                />
             </Head>
             <div className='w-full h-full flex flex-col justify-between pb-4'>
                 <div className='grid grid-cols-[1fr,4fr,1fr] pt-2'>
