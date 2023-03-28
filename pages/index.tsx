@@ -1,7 +1,6 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
 import { addDoc, collection } from 'firebase/firestore'
 import { db } from '@/firebase.config'
 import { signIn, useSession } from 'next-auth/react'
@@ -11,20 +10,18 @@ export default function Home() {
     const router = useRouter()
     const { data: session } = useSession()
     const [roomName, setRoomName] = useState<string>()
-    const handleNewRoom = (event: any) => {
+    const handleNewRoom = async (event: any) => {
         event.preventDefault()
-        const idRoom = uuidv4()
-        localStorage.setItem(
-            'currentRoom',
-            JSON.stringify({ idRoom, roomName })
-        )
-        addDoc(collection(db, 'rooms'), {
-            id: idRoom,
+        const doc = await addDoc(collection(db, 'rooms'), {
             name: roomName,
             users: [session?.user?.email],
         })
+        localStorage.setItem(
+            'currentRoom',
+            JSON.stringify({ idRoom: doc.id, roomName })
+        )
         router.push(
-            `/room/${idRoom}?routeName=${roomName?.replaceAll(' ', '-')}`
+            `/room/${doc.id}?routeName=${roomName?.replaceAll(' ', '-')}`
         )
     }
 
