@@ -13,7 +13,6 @@ import { createPortal } from 'react-dom'
 import AddStoryModal from './AddStoryModal'
 import ModalLayout from './ModalLayout'
 import ImportCsv from './ImportCsv'
-import Story from '@/models/story.model'
 
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)

@@ -14,7 +14,7 @@ export default function Home() {
         event.preventDefault()
         const doc = await addDoc(collection(db, 'rooms'), {
             name: roomName,
-            users: [session?.user?.email],
+            authorizedUsers: [session?.user?.uidFirebase],
         })
         localStorage.setItem(
             'currentRoom',

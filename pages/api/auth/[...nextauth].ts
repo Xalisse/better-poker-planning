@@ -5,6 +5,7 @@ import { db } from '@/firebase.config'
 import * as firestoreFunction from 'firebase/firestore'
 import { getAuth } from 'firebase-admin/auth'
 import { cert } from 'firebase-admin/app'
+import { decode } from 'jsonwebtoken'
 
 export const authOptions = {
     adapter: FirestoreAdapter({
@@ -33,6 +34,10 @@ export const authOptions = {
         session: async ({ session, token }: any) => {
             return {
                 ...session,
+                user: {
+                    ...session.user,
+                    uidFirebase: (decode(token.customToken) as any).uid,
+                },
                 customToken: token.customToken,
             }
         },
