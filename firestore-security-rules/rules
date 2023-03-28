@@ -1,0 +1,21 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /rooms/{room} {
+      allow create: if request.auth != null; // Autoriser la création des documents si connecté
+      allow read: if request.auth != null && 
+      	request.auth.token.user_id in resource.data.authorizedUsers;
+      allow update, delete: 
+      	// Seuls les utilisateurs autorisés peuvent modifier ou supprimer un document
+      	if request.auth != null && 
+        	request.auth.token.user_id in resource.data.authorizedUsers;
+      match /stories/{story} {
+        allow read, write: 
+        	// Seuls les utilisateurs autorisés peuvent créer, modifier ou supprimer une story
+        	if request.auth != null && 
+          	request.auth.token.user_id in get(/databases/$(database)/documents/rooms/$(room)).data.authorizedUsers; 
+      }
+    }
+  }
+}
