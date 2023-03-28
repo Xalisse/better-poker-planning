@@ -1,8 +1,7 @@
 import { CardValueType } from '@/models/card.model'
 import User from '@/models/user.model'
 import { useFormik } from 'formik'
-import router from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import UserCard from './UserCard'
 
 interface Props {
@@ -10,7 +9,8 @@ interface Props {
     selectedStoryId?: string
     playerCards: { user: User; cardValue: CardValueType }[]
     connectedUsers: User[]
-    doFlipCards: (isFlipped: boolean) => void
+    isFlipped: boolean
+    doFlipCards: () => void
     saveEstimation: (storyId: string, value: string) => void
 }
 
@@ -35,9 +35,8 @@ const PokerTable = ({
     saveEstimation,
     playerCards,
     connectedUsers,
+    isFlipped,
 }: Props) => {
-    const { id } = router.query
-    const [isFlipped, setIsFlipped] = useState(false)
     const northUser: { user: User; cardValue: CardValueType }[] = []
     const eastUser: { user: User; cardValue: CardValueType }[] = []
     const westUser: { user: User; cardValue: CardValueType }[] = []
@@ -86,25 +85,13 @@ const PokerTable = ({
     })
 
     const handleFlipCards = () => {
-        setIsFlipped(!isFlipped)
         setEstimationValue('value', average(playerCards))
-        doFlipCards(!isFlipped)
+        doFlipCards()
     }
 
     useEffect(() => {
-        const localIsFlipped = localStorage.getItem('isFlipped')
-        if (localIsFlipped) {
-            setIsFlipped(JSON.parse(localIsFlipped))
-        }
-    }, [id])
-
-    useEffect(() => {
-        localStorage.setItem('isFlipped', JSON.stringify(isFlipped))
+        console.log('ISFLIPPED', isFlipped)
     }, [isFlipped])
-
-    useEffect(() => {
-        setIsFlipped(false)
-    }, [selectedStoryId])
 
     return (
         <div className='grid grid-cols-[1fr,3fr,1fr] grid-rows-[2fr,3fr,2fr] w-2/3 self-center py-10 gap-4'>

@@ -70,9 +70,9 @@ export default function Room() {
         postUserConnected(newUser, idRoom)
     }
 
-    const handleFlipCards = (isFlipped: boolean) => {
-        setIsFlipped(isFlipped)
-        postFlipCards(isFlipped, idRoom)
+    const handleFlipCards = () => {
+        setIsFlipped(!isFlipped)
+        postFlipCards(!isFlipped, idRoom)
     }
 
     const handleChangeName = (name: string) => {
@@ -135,6 +135,7 @@ export default function Room() {
         const unsub = onSnapshot(storyRef, (doc) => {
             setSelectedStory(doc.data())
         })
+        // isFlipped(false)
         return () => unsub()
     }, [selectedStoryId, id])
 
@@ -163,6 +164,10 @@ export default function Room() {
     useEffect(() => {
         cards && localStorage.setItem('cards', JSON.stringify(cards))
     }, [cards])
+
+    useEffect(() => {
+        localStorage.setItem('isFlipped', JSON.stringify(isFlipped))
+    }, [isFlipped])
 
     useEffect(() => {
         currentUser &&
@@ -218,6 +223,10 @@ export default function Room() {
                 }
             }
         }
+        const localIsFlipped = localStorage.getItem('isFlipped')
+        if (localIsFlipped) {
+            setIsFlipped(JSON.parse(localIsFlipped))
+        }
 
         const newPusher = new Pusher('36a15d9047517284e838', {
             cluster: 'eu',
@@ -263,6 +272,7 @@ export default function Room() {
             }
         })
         chanel.bind('cards-flipped', ({ flipped }: { flipped: boolean }) => {
+            console.log('cards-flipped event', flipped)
             if (!flipped) {
                 // means we start a new planning, so we reset the cards
                 setCards([])
@@ -391,6 +401,7 @@ export default function Room() {
                             connectedUsers={connectedUsers}
                             doFlipCards={handleFlipCards}
                             saveEstimation={handleSaveEstimation}
+                            isFlipped={isFlipped}
                         />
                         <PlayerHand
                             currentCard={currentCard}
