@@ -113,10 +113,10 @@ export default function Room() {
         postFlipCards(false, idRoom)
     }
 
-    const handleSaveEstimation = async (value: string) => {
+    const handleSaveEstimation = async (storyId: string, value: string) => {
         if (!selectedStoryId) return
         // save estimation to firebase
-        const storyRef = doc(db, 'rooms', `${id}`, 'stories', selectedStoryId)
+        const storyRef = doc(db, 'rooms', `${id}`, 'stories', storyId)
         await updateDoc(storyRef, { estimation: value })
         toast.success('Éstimation sauvegardée 🪩')
     }
