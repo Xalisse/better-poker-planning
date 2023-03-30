@@ -19,11 +19,12 @@ import ChangeName from '@/components/ChangeName'
 import ListStories from '@/components/ListStories'
 import StoryDetails from '@/components/StoryDetails'
 import { doc, DocumentData, onSnapshot, updateDoc } from 'firebase/firestore'
-import { db } from '@/firebase.config'
+import { app, auth, db } from '@/firebase.config'
 import PokerTable from '@/components/PokerTable'
 import PlayerHand from '@/components/PlayerHand'
 import { CardInterface, CardValueType } from '@/models/card.model'
 import { useSession } from 'next-auth/react'
+import ListUsers from '@/components/ListUsers'
 
 export default function Room() {
     const router = useRouter()
@@ -42,6 +43,7 @@ export default function Room() {
     const [selectedStoryId, setSelectedStoryId] = useState<string>()
     const [selectedStory, setSelectedStory] = useState<DocumentData>()
     const [isFlipped, setIsFlipped] = useState<boolean>(false)
+    const [currentRoom, setCurrentRoom] = useState<any>()
 
     const { data: session } = useSession()
 
@@ -72,7 +74,13 @@ export default function Room() {
         })
         setShowModalChangeName(false)
         postUserChanged(
-            { id: currentUser.id, name, isSpectator: currentUser.isSpectator },
+            {
+                id: currentUser.id,
+                name,
+                isSpectator: currentUser.isSpectator,
+                picture: currentUser.picture,
+                uidFirebase: currentUser.uidFirebase,
+            },
             idRoom
         )
     }
@@ -113,14 +121,31 @@ export default function Room() {
     }
 
     useEffect(() => {
+        const roomRef = doc(db, 'rooms', `${id}`)
+        const unsub = onSnapshot(roomRef, (doc) => {
+            console.log(doc)
+            if (doc.exists()) {
+                const room = doc.data()
+                setCurrentRoom(room)
+                localStorage.setItem('currentRoom', JSON.stringify(room))
+            } else {
+                console.log('No such document!')
+            }
+        })
+        return () => unsub()
+    }, [id])
+
+    useEffect(() => {
         if (!session || !session.user) {
             setCurrentUser(undefined)
         } else {
             setCurrentUser({
                 id: session.user.email || uuidv4(),
+                email: session.user.email,
                 name: session.user.name,
                 picture: session.user.image,
                 isSpectator: false,
+                uidFirebase: session.user.uidFirebase,
             })
         }
     }, [session])
@@ -417,6 +442,17 @@ export default function Room() {
                             </div>
                         </div>
                     </>,
+                    document.body
+                )}
+            {currentRoom &&
+                createPortal(
+                    <div className='absolute top-[15%] h-[70%] w-1/3'>
+                        <div className='rounded-r-xl bg-white border-2 border-l-0 border-dark-tertiary h-full p-5 text-left overflow-auto flex flex-col '>
+                            <h2>Personnes ayant accès</h2>
+
+                            <ListUsers users={currentRoom.authorizedUsers} />
+                        </div>
+                    </div>,
                     document.body
                 )}
         </>

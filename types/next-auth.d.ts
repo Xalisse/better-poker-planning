@@ -9,6 +9,7 @@ declare module 'next-auth' {
             email: string
             image: string
             uidFirebase: string
+            uidFirebase: string
         }
         customToken: string
         expires: string

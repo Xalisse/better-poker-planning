@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import { addDoc, collection, doc, setDoc } from 'firebase/firestore'
+import { addDoc, collection } from 'firebase/firestore'
 import { db } from '@/firebase.config'
 import { signIn, useSession } from 'next-auth/react'
 import { FcGoogle } from 'react-icons/fc'
@@ -15,7 +15,8 @@ export default function Home() {
         event.preventDefault()
         const room = await addDoc(collection(db, 'rooms'), {
             name: roomName,
-            authorizedUsers: [session.user.uidFirebase],
+            authorizedUsersUid: [session.user.uidFirebase],
+            authorizedUsers: [session.user],
         })
 
         localStorage.setItem(

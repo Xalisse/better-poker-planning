@@ -1,5 +1,5 @@
-import { app } from '@/firebase.config'
-import { getAuth, signInWithCustomToken } from 'firebase/auth'
+import { auth } from '@/firebase.config'
+import { signInWithCustomToken } from 'firebase/auth'
 import { useSession } from 'next-auth/react'
 import router from 'next/router'
 import { useEffect } from 'react'
@@ -9,7 +9,6 @@ export default function LoggedIn() {
     useEffect(() => {
         console.log(session)
         if (!session || !session.customToken) return
-        const auth = getAuth(app)
         signInWithCustomToken(auth, session.customToken).then(() =>
             router.push('/')
         )

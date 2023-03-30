@@ -5,11 +5,11 @@ service cloud.firestore {
     match /rooms/{room} {
       allow create: if request.auth != null;
       allow read, write: if request.auth != null 
-          && request.auth.token.user_id in resource.data.authorizedUsers;
+          && request.auth.token.user_id in resource.data.authorizedUsersUid;
       match /stories/{story} {
         allow create, read, write:
           if request.auth != null && 
-            request.auth.token.user_id in get(/databases/$(database)/documents/rooms/$(room)).data.authorizedUsers; 
+            request.auth.token.user_id in get(/databases/$(database)/documents/rooms/$(room)).data.authorizedUsersUid; 
       }
     }
   }
