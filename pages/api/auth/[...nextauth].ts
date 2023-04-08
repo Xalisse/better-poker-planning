@@ -23,6 +23,7 @@ export const authOptions = {
             clientSecret: process.env.GOOGLE_SECRET_AUTH || '',
         }),
     ],
+    secret: process.env.NEXTAUTH_SECRET,
     session: { strategy: 'jwt' as 'jwt' },
     callbacks: {
         async jwt({ token, user }: any) {
