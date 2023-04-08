@@ -476,6 +476,9 @@ export default function Room() {
                         <div className='rounded-r-xl bg-white border-2 border-l-0 border-dark-tertiary h-full p-5 text-left overflow-auto flex flex-col '>
                             <Users
                                 authorizedUsers={currentRoom.authorizedUsers}
+                                allAuthorizedUsersEmail={
+                                    currentRoom.authorizedUsersEmail
+                                }
                                 onAddUser={handleAddAuthorizedUser}
                             />
                         </div>

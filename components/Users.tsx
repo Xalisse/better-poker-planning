@@ -6,10 +6,15 @@ import ListUsers from './ListUsers'
 
 interface Props {
     authorizedUsers: User[]
+    allAuthorizedUsersEmail: string[]
     onAddUser: (email: string) => void
 }
 
-const Users: NextPage<Props> = ({ authorizedUsers, onAddUser }) => {
+const Users: NextPage<Props> = ({
+    authorizedUsers,
+    allAuthorizedUsersEmail,
+    onAddUser,
+}) => {
     const { handleSubmit, handleChange } = useFormik({
         initialValues: {
             email: '',
@@ -23,7 +28,10 @@ const Users: NextPage<Props> = ({ authorizedUsers, onAddUser }) => {
         <>
             <h2>Personnes ayant accès</h2>
 
-            <ListUsers users={authorizedUsers} />
+            <ListUsers
+                users={authorizedUsers}
+                allUsersEmail={allAuthorizedUsersEmail}
+            />
 
             <form onSubmit={handleSubmit}>
                 <p>Ajouter un utilisateur</p>
