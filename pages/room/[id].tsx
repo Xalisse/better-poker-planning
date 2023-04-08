@@ -153,6 +153,7 @@ export default function Room() {
         if (!session || !session.user) {
             setCurrentUser(undefined)
         } else {
+            // The user connect to the room
             setCurrentUser({
                 id: session.user.email || uuidv4(),
                 email: session.user.email,
@@ -161,8 +162,28 @@ export default function Room() {
                 isSpectator: false,
                 uidFirebase: session.user.uidFirebase,
             })
+            // We add the user to authorizedUsers of the room if he is not already in
+            if (
+                currentRoom &&
+                !currentRoom?.authorizedUsers?.find(
+                    (user: User) =>
+                        user.uidFirebase === session.user.uidFirebase
+                )
+            ) {
+                updateDoc(roomRef, {
+                    authorizedUsers: arrayUnion(session.user),
+                })
+                    .then(() => {
+                        toast.success('Première connexion sur la salle !')
+                    })
+                    .catch((error) => {
+                        toast.error("Erreur lors de l'ajout de l'utilisateur")
+                        console.error(error)
+                    })
+            }
         }
-    }, [session])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [session, currentRoom])
 
     useEffect(() => {
         if (!selectedStoryId) return
