@@ -27,7 +27,9 @@ export const authOptions = {
     callbacks: {
         async jwt({ token, user }: any) {
             if (user) {
-                token.customToken = await getAuth().createCustomToken(user.id)
+                token.customToken = await getAuth().createCustomToken(user.id, {
+                    email: user.email,
+                })
             }
             return token
         },

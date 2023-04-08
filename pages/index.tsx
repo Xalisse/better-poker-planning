@@ -15,7 +15,7 @@ export default function Home() {
         event.preventDefault()
         const room = await addDoc(collection(db, 'rooms'), {
             name: roomName,
-            authorizedUsersUid: [session.user.uidFirebase],
+            authorizedUsersEmail: [session.user.email],
             authorizedUsers: [session.user],
         })
 

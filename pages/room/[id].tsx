@@ -18,13 +18,21 @@ import { createPortal } from 'react-dom'
 import ChangeName from '@/components/ChangeName'
 import ListStories from '@/components/ListStories'
 import StoryDetails from '@/components/StoryDetails'
-import { doc, DocumentData, onSnapshot, updateDoc } from 'firebase/firestore'
-import { app, auth, db } from '@/firebase.config'
+import {
+    arrayUnion,
+    doc,
+    DocumentData,
+    onSnapshot,
+    updateDoc,
+} from 'firebase/firestore'
+import { db } from '@/firebase.config'
 import PokerTable from '@/components/PokerTable'
 import PlayerHand from '@/components/PlayerHand'
 import { CardInterface, CardValueType } from '@/models/card.model'
 import { useSession } from 'next-auth/react'
-import ListUsers from '@/components/ListUsers'
+import Users from '@/components/Users'
+
+const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
 
 export default function Room() {
     const router = useRouter()
@@ -45,6 +53,7 @@ export default function Room() {
     const [isFlipped, setIsFlipped] = useState<boolean>(false)
     const [currentRoom, setCurrentRoom] = useState<any>()
 
+    const roomRef = doc(db, 'rooms', `${id}`)
     const { data: session } = useSession()
 
     const handleChooseValue = (card: CardValueType) => {
@@ -80,6 +89,7 @@ export default function Room() {
                 isSpectator: currentUser.isSpectator,
                 picture: currentUser.picture,
                 uidFirebase: currentUser.uidFirebase,
+                email: currentUser.email,
             },
             idRoom
         )
@@ -120,20 +130,24 @@ export default function Room() {
         pusher?.disconnect()
     }
 
-    useEffect(() => {
-        const roomRef = doc(db, 'rooms', `${id}`)
-        const unsub = onSnapshot(roomRef, (doc) => {
-            console.log(doc)
-            if (doc.exists()) {
-                const room = doc.data()
-                setCurrentRoom(room)
-                localStorage.setItem('currentRoom', JSON.stringify(room))
-            } else {
-                console.log('No such document!')
-            }
+    const handleAddAuthorizedUser = async (email: string) => {
+        // Gérer cas si email invalide (doit finir par @gmail.com)
+        if (!emailRegex.test(email) || !email.endsWith('@gmail.com')) {
+            toast.error('Email invalide, doit finir par @gmail.com')
+            return
+        }
+        // Ajouter l'email à authorizedUsersEmails
+        updateDoc(roomRef, {
+            authorizedUsersEmail: arrayUnion(email),
         })
-        return () => unsub()
-    }, [id])
+            .then(() => {
+                toast.success('Utilisateur ajouté')
+            })
+            .catch((error) => {
+                toast.error("Erreur lors de l'ajout de l'utilisateur")
+                console.error(error)
+            })
+    }
 
     useEffect(() => {
         if (!session || !session.user) {
@@ -240,6 +254,17 @@ export default function Room() {
             }
         }
 
+        const unsubRoomSnapshot = onSnapshot(roomRef, (doc) => {
+            if (doc.exists()) {
+                const room = doc.data()
+                setCurrentRoom(room)
+                localStorage.setItem('currentRoom', JSON.stringify(room))
+            } else {
+                console.log('No such document!')
+                // TODO: do something with the error
+            }
+        })
+
         const newPusher = new Pusher('36a15d9047517284e838', {
             cluster: 'eu',
             userAuthentication: {
@@ -326,6 +351,7 @@ export default function Room() {
         return () => {
             console.log('dicsonnecting')
             pusher?.disconnect()
+            unsubRoomSnapshot()
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id])
@@ -448,9 +474,10 @@ export default function Room() {
                 createPortal(
                     <div className='absolute top-[15%] h-[70%] w-1/3'>
                         <div className='rounded-r-xl bg-white border-2 border-l-0 border-dark-tertiary h-full p-5 text-left overflow-auto flex flex-col '>
-                            <h2>Personnes ayant accès</h2>
-
-                            <ListUsers users={currentRoom.authorizedUsers} />
+                            <Users
+                                authorizedUsers={currentRoom.authorizedUsers}
+                                onAddUser={handleAddAuthorizedUser}
+                            />
                         </div>
                     </div>,
                     document.body
