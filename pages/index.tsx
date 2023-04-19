@@ -29,6 +29,10 @@ export default function Home() {
         <>
             <Head>
                 <title>Better Poker Planning 🦄</title>
+                <meta
+                    property='og:image'
+                    content={`https://better-poker-planning-git-hvalette-og-xalisse.vercel.app/api/og`}
+                />
             </Head>
             <div className='pt-6'>
                 <h1 className='mb-44'>Better Poker planning</h1>
