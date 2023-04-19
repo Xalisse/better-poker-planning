@@ -13,7 +13,7 @@ const StoryDetails = ({ story }: Props) => {
             <p className='text-lg font-bold'>{story?.title}</p>
             {story?.estimation && <p>{story.estimation}</p>}
             {!story?.estimation && <p>Non estimée</p>}
-            <div dangerouslySetInnerHTML={{__html: story?.description}}></div>
+            <div dangerouslySetInnerHTML={{ __html: story?.description }}></div>
         </div>
     )
 }
