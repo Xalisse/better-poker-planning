@@ -30,26 +30,19 @@ export default function Home() {
             <Head>
                 <title>Better Poker Planning 🦄</title>
             </Head>
-            <div className='pt-6'>
-                <h1 className='mb-44'>Better Poker planning</h1>
-                <form
-                    onSubmit={handleNewRoom}
-                    className='flex flex-col items-center gap-4'
-                >
-                    <input
-                        name='name'
-                        onChange={(e) => setRoomName(e.target.value)}
-                        placeholder='Nom de la salle'
-                    ></input>
-                    <button
-                        type='submit'
-                        disabled={!roomName}
-                        className='primary'
-                    >
-                        jouer
-                    </button>
-                </form>
-            </div>
+            <form
+                onSubmit={handleNewRoom}
+                className='h-full flex flex-col justify-center items-center gap-4'
+            >
+                <input
+                    name='name'
+                    onChange={(e) => setRoomName(e.target.value)}
+                    placeholder='Nom de la salle'
+                ></input>
+                <button type='submit' disabled={!roomName} className='primary'>
+                    Créer la salle
+                </button>
+            </form>
         </>
     )
 }

@@ -35,12 +35,12 @@ export default function UserCard({
     isFlipped = false,
 }: Props) {
     return (
-        <div className='flex flex-col w-fit m-auto'>
+        <div className='flex flex-col justify-center items-center m-auto'>
             {user.isSpectator && <SpectatorCard />}
             {!user.isSpectator && isFlipped && <Card value={cardValue || ''} />}
             {!user.isSpectator && !isFlipped && cardValue && <BackCard />}
             {!user.isSpectator && !isFlipped && !cardValue && <EmptyCard />}
-            <p>{user.name}</p>
+            <p className='max-w-[200px] truncate'>{user.name}</p>
         </div>
     )
 }

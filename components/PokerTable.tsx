@@ -18,7 +18,7 @@ const average = (cards: { user: User; cardValue: CardValueType }[]) => {
     if (cards.length === 0) return '☕️'
     const total = cards.reduce(
         (acc, c) =>
-            typeof c.cardValue === 'string' ? acc : acc + (c.cardValue || 0),
+            typeof c.cardValue === 'string' ? acc : acc + (c.cardValue ?? 0),
         0
     )
     const voting = cards.filter(
