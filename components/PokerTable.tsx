@@ -94,7 +94,7 @@ const PokerTable = ({
     }, [isFlipped])
 
     return (
-        <div className='grid grid-cols-[1fr,3fr,1fr] grid-rows-[2fr,3fr,2fr] w-2/3 self-center py-10 gap-4'>
+        <div className='grid grid-cols-[1fr,3fr,1fr] grid-rows-[2fr,3fr,2fr] w-2/3 self-center py-10 gap-4 mt-10'>
             <div className='grid grid-rows-3 bg-light-secondary w-full h-full m-auto items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
                 {selectedStoryTitle && <div>{selectedStoryTitle}</div>}
                 <button

@@ -72,27 +72,42 @@ body {
         transition: all 0.6s ease;
     }
 
-    .initial-card-position {
-        transform: rotate(40deg);
-    }
-
-    .card-appear {
-        animation: cardAppear 1s forwards;
-    }
-
     .draw-card:hover {
-        animation: drawIn 0.2s forwards;
+        animation: drawCard 0.2s forwards;
     }
 
-    @keyframes drawIn {
+    .show-cards {
+        animation: showCards 0.5s forwards;
+    }
+
+    .hide-cards {
+        animation: hideCards 0.5s forwards;
+    }
+
+    @keyframes drawCard {
         0% {
         }
-        50% {
-            transform: translateX(1em);
+        100% {
+            transform: translateX(1em) translateY(-70px) scale(1.5)
+                rotate(10deg);
+        }
+    }
+
+    @keyframes showCards {
+        0% {
+            bottom: -100px;
         }
         100% {
-            transform: translateX(2em) translateY(-20px) scale(1.5)
-                rotate(10deg);
+            bottom: 0;
+        }
+    }
+
+    @keyframes hideCards {
+        0% {
+            bottom: 0;
+        }
+        100% {
+            bottom: -100px;
         }
     }
 }

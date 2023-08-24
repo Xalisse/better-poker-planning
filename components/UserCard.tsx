@@ -40,7 +40,7 @@ export default function UserCard({
             {!user.isSpectator && isFlipped && <Card value={cardValue || ''} />}
             {!user.isSpectator && !isFlipped && cardValue && <BackCard />}
             {!user.isSpectator && !isFlipped && !cardValue && <EmptyCard />}
-            <p className='max-w-[200px] truncate'>{user.name}</p>
+            <p className='max-w-[150px] truncate'>{user.name}</p>
         </div>
     )
 }

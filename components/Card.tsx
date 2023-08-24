@@ -21,10 +21,10 @@ export default function Card({
                     : 'bg-white'
             } hover:cursor-pointer hover:z-40 ${
                 isOnHands
-                    ? 'w-16 h-28 initial-card-position my-[-25px] transition-all mx-[-0.5em] draw-card'
+                    ? `w-16 h-28 mx-2 transition-all mb-[-25px] draw-card`
                     : 'w-12 h-20'
             }`}
-            onClick={(e) => !disabled && onClick && onClick()}
+            onClick={() => !disabled && onClick && onClick()}
         >
             {value}
         </div>

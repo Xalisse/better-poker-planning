@@ -323,7 +323,7 @@ export default function Room() {
             <Head>
                 <title>{routeName}</title>
             </Head>
-            <div className='w-full h-full flex flex-col justify-center pb-4'>
+            <div className='w-full h-full flex flex-col pb-4'>
                 <Settings
                     currentUser={currentUser}
                     showModalChangeName={showModalChangeName}
