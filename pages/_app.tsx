@@ -2,6 +2,7 @@ import 'tailwindcss/tailwind.css'
 import '../styles/globals.css'
 import { Comfortaa } from '@next/font/google'
 import { Toaster } from 'sonner'
+import Layout from '@/components/layout/Layout'
 
 const comfortaa = Comfortaa({
     subsets: ['latin'],
@@ -18,23 +19,13 @@ export default function MyApp({ Component, pageProps }: any) {
                     }
                 `}
             </style>
-            <div className='flex flex-col justify-between items-center h-full w-full'>
-                <main
-                    className={`${comfortaa.className} w-full max-h-[75vh] overflow-y-auto overflow-x-hidden`}
-                >
-                    <Component {...pageProps} />
-                    <Toaster />
-                </main>
-                <footer className='w-full flex flex-row justify-center items-center h-10 border-t'>
-                    Made with 💖 by{' '}
-                    <a
-                        href='https://github.com/Xalisse'
-                        className='!cursor-pointer px-1'
-                    >
-                        Valentine
-                    </a>
-                </footer>
-            </div>
+
+            <Layout
+                className={`w-full h-full flex flex-col justify-between ${comfortaa.className}`}
+            >
+                <Component {...pageProps} />
+            </Layout>
+            <Toaster />
         </>
     )
 }

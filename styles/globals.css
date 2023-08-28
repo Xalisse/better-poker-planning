@@ -29,10 +29,15 @@ body {
         @apply border-2 rounded-lg p-2;
     }
 
+    input:focus {
+        @apply outline-2 outline-offset-4 outline-dark-secondary;
+    }
+
     button {
         @apply !bg-dark-secondary text-extra-light-primary rounded-lg py-2 px-5;
         transition: all 0.3s ease;
     }
+
     button.primary:hover {
         background: rgb(197, 187, 238);
         background: linear-gradient(
@@ -41,22 +46,26 @@ body {
             rgba(255, 216, 192, 1) 100%
         );
     }
+
     button:hover {
         cursor: pointer;
         transform: scale(1.1);
         transform-origin: center;
         transition: all 0.6s ease;
     }
+
     button:disabled {
         @apply border-2 border-tertiary text-tertiary;
         cursor: not-allowed;
         background: none !important;
         transform: none;
     }
+
     a {
         transition: all 0.6s ease;
         @apply text-dark-secondary font-bold;
     }
+
     a:hover {
         cursor: copy;
         transform: scale(1.1);
@@ -64,17 +73,41 @@ body {
     }
 
     .draw-card:hover {
-        animation: drawIn 0.2s forwards;
+        animation: drawCard 0.2s forwards;
     }
 
-    @keyframes drawIn {
+    .show-cards {
+        animation: showCards 0.5s forwards;
+    }
+
+    .hide-cards {
+        animation: hideCards 0.5s forwards;
+    }
+
+    @keyframes drawCard {
         0% {
         }
-        50% {
-            transform: translateX(-0.5em);
+        100% {
+            transform: translateX(1em) translateY(-70px) scale(1.5)
+                rotate(10deg);
+        }
+    }
+
+    @keyframes showCards {
+        0% {
+            bottom: -100px;
         }
         100% {
-            transform: translateX(0.5em) translateY(-20px) scale(1.2);
+            bottom: 0;
+        }
+    }
+
+    @keyframes hideCards {
+        0% {
+            bottom: 0;
+        }
+        100% {
+            bottom: -100px;
         }
     }
 }

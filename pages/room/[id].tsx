@@ -12,10 +12,8 @@ import { useRouter } from 'next/router'
 import Pusher from 'pusher-js'
 import { useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import { FiCopy } from 'react-icons/fi'
 import { toast } from 'sonner'
 import { createPortal } from 'react-dom'
-import ChangeName from '@/components/ChangeName'
 import ListStories from '@/components/ListStories'
 import StoryDetails from '@/components/StoryDetails'
 import {
@@ -30,6 +28,7 @@ import { firebaseConfig } from '@/firebase.config'
 import PokerTable from '@/components/PokerTable'
 import PlayerHand from '@/components/PlayerHand'
 import { CardInterface, CardValueType } from '@/models/card.model'
+import Settings from '@/components/Settings'
 
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
@@ -78,9 +77,9 @@ export default function Room() {
     const handleChangeName = (name: string) => {
         if (!currentUser) return
         setCurrentUser((user) => ({
-            id: user?.id || '',
+            id: user?.id ?? '',
             name,
-            isSpectator: user?.isSpectator || false,
+            isSpectator: user?.isSpectator ?? false,
         }))
         setConnectedUsers((users) => {
             const index = users.findIndex((u) => u.id === currentUser.id)
@@ -322,61 +321,15 @@ export default function Room() {
     return (
         <>
             <Head>
-                <title>{routeName} - Better Poker Planning 🦄</title>
+                <title>{routeName}</title>
             </Head>
-            <div className='w-full h-full flex flex-col justify-between pb-4'>
-                <div className='grid grid-cols-[1fr,4fr,1fr] pt-2'>
-                    <div
-                        className='pl-4 flex justify-left items-center cursor-pointer text-5xl'
-                        onClick={() => router.push('/')}
-                    >
-                        <span className='transition-all hover:scale-110'>
-                            🦄
-                        </span>
-                    </div>
-                    <div className=''>
-                        <h1>{routeName}</h1>
-                        {currentUser && (
-                            <h2>Connecté en tant que {currentUser.name}</h2>
-                        )}
-                        <div>
-                            <a
-                                className='cursor-pointer'
-                                onClick={() => setShowModalChangeName(true)}
-                            >
-                                Modifier mon nom
-                            </a>
-                            {currentUser?.name &&
-                                showModalChangeName &&
-                                createPortal(
-                                    <ChangeName
-                                        onClose={() =>
-                                            setShowModalChangeName(false)
-                                        }
-                                        onValidate={handleChangeName}
-                                        name={currentUser.name}
-                                    />,
-                                    document.body
-                                )}
-                        </div>
-                    </div>
-                    {currentUser && (
-                        <div className='flex justify-center items-center'>
-                            <a
-                                onClick={() => {
-                                    navigator.clipboard.writeText(
-                                        window.location.href
-                                    )
-                                    toast('Copié dans le presse-papier ✨')
-                                }}
-                                className='flex flex-row justify-right items-center'
-                            >
-                                Inviter des joueurs <FiCopy className='mx-2' />
-                            </a>
-                        </div>
-                    )}
-                </div>
-
+            <div className='w-full h-full flex flex-col pb-4'>
+                <Settings
+                    currentUser={currentUser}
+                    showModalChangeName={showModalChangeName}
+                    setShowModalChangeName={setShowModalChangeName}
+                    handleChangeName={handleChangeName}
+                />
                 {!currentUser && (
                     <div className='flex flex-col m-auto gap-4'>
                         <div>Saisissez votre nom d&apos;utilisateur</div>
@@ -415,7 +368,7 @@ export default function Room() {
             </div>
 
             <button
-                className='absolute top-[15%] right-0 rounded-r-none'
+                className='absolute top-[50%] right-0 rounded-r-none'
                 onClick={() => setShowUS(true)}
             >
                 {'< '}US
@@ -426,11 +379,11 @@ export default function Room() {
                     <>
                         <button
                             onClick={() => setShowUS(false)}
-                            className='absolute right-[33%] top-[17%] rounded-r-none text-dark-tertiary !bg-white border-2 border-r-0 border-dark-tertiary'
+                            className='absolute right-[33%] top-[50%] rounded-r-none text-dark-tertiary !bg-white border-2 border-r-0 border-dark-tertiary'
                         >
                             {' >'}
                         </button>
-                        <div className='absolute right-0 top-[15%] h-[70%] w-1/3'>
+                        <div className='absolute right-0 top-[15%] h-[70%] w-1/3 z-20'>
                             <div className='rounded-l-xl bg-white border-2 border-r-0 border-dark-tertiary h-full p-5 text-left overflow-auto flex flex-col justify-between'>
                                 {selectedStoryId && (
                                     <div>
