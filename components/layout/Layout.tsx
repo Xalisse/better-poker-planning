@@ -18,25 +18,26 @@ const Layout = ({ className, children }: Props) => {
     return (
         <div className={className}>
             <header className='p-2 w-full flex flex-row items-center justify-between'>
-                <div className='flex flex-row items-end'>
-                    <Link href='/'>
-                        <span className='text-5xl cursor-pointer'>🦄</span>
-                    </Link>
-                    <h1
-                        className={`cursor-pointer ${
-                            router.query.routeName && 'pr-4 mr-4 border-r'
-                        }`}
-                        onClick={() => router.push('/')}
-                    >
-                        Better Poker Planning
-                    </h1>
+                <div className='flex flex-row items-center'>
+                    <div className='flex flex-row gap-4 items-center'>
+                        <Link href='/'>
+                            <span className='text-5xl cursor-pointer'>🦄</span>
+                        </Link>
+                        <h1
+                            className={`${
+                                router.query.routeName && 'pr-4 mr-4 border-r'
+                            }`}
+                        >
+                            Better Poker Planning
+                        </h1>
+                    </div>
                     <h1>{router.query.routeName}</h1>
                 </div>
             </header>
             <main className={`${comfortaa.className} w-full flex-1`}>
                 {children}
             </main>
-            <footer className='fixed bottom-0 right-0 flex flex-row justify-center items-center py-2'>
+            <footer className='fixed w-full bg-extra-light-secondary border-t bottom-0 right-0 flex flex-row justify-center items-center h-[40px]'>
                 Made with 💖 by{' '}
                 <a
                     href='https://github.com/Xalisse'

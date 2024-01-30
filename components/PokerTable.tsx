@@ -37,6 +37,10 @@ const PokerTable = ({
     connectedUsers,
     isFlipped,
 }: Props) => {
+    useEffect(() => {
+        console.log('PLAYER CARDS', playerCards)
+    })
+
     const northUser: { user: User; cardValue: CardValueType }[] = []
     const eastUser: { user: User; cardValue: CardValueType }[] = []
     const westUser: { user: User; cardValue: CardValueType }[] = []
@@ -88,10 +92,6 @@ const PokerTable = ({
         setEstimationValue('value', average(playerCards))
         doFlipCards()
     }
-
-    useEffect(() => {
-        console.log('ISFLIPPED', isFlipped)
-    }, [isFlipped])
 
     return (
         <div className='grid grid-cols-[1fr,3fr,1fr] grid-rows-[2fr,3fr,2fr] w-2/3 self-center py-10 gap-4 mt-10'>

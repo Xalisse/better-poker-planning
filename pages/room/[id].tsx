@@ -29,6 +29,9 @@ import PokerTable from '@/components/PokerTable'
 import PlayerHand from '@/components/PlayerHand'
 import { CardInterface, CardValueType } from '@/models/card.model'
 import Settings from '@/components/Settings'
+import { areCardsValueEqual } from '@/utils/cards.utils'
+import ReactConfetti from 'react-confetti'
+import Popup from '@/components/Popup'
 
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
@@ -50,6 +53,7 @@ export default function Room() {
     const [selectedStoryId, setSelectedStoryId] = useState<string>()
     const [selectedStory, setSelectedStory] = useState<DocumentData>()
     const [isFlipped, setIsFlipped] = useState<boolean>(false)
+    const [cardsSameValue, setCardsSameValue] = useState<boolean>(false)
 
     const handleChooseValue = (card: CardValueType) => {
         if (!currentUser || !card) return
@@ -70,6 +74,12 @@ export default function Room() {
     }
 
     const handleFlipCards = () => {
+        if (isFlipped) {
+            setCardsSameValue(false)
+        } else {
+            setCardsSameValue(areCardsValueEqual(cards))
+        }
+
         setIsFlipped(!isFlipped)
         postFlipCards(!isFlipped, idRoom)
     }
@@ -324,12 +334,55 @@ export default function Room() {
                 <title>{routeName}</title>
             </Head>
             <div className='w-full h-full flex flex-col pb-4'>
+                {
+                    //Bingo popup when all cards are the same
+                }
+                {isFlipped && cardsSameValue && (
+                    <>
+                        <Popup active={cardsSameValue} domNode={document.body}>
+                            <div className='flex flex-col gap-2 justify-center items-center pop-in'>
+                                <p className='text-5xl'>BINGO !</p>
+                                <span className='text-[150px] rotate-12'>
+                                    🎉
+                                </span>
+                            </div>
+                        </Popup>
+                        <ReactConfetti
+                            run={cardsSameValue}
+                            width={window.innerWidth}
+                            height={window.innerHeight}
+                            recycle={false}
+                            numberOfPieces={1000}
+                            initialVelocityX={2}
+                            initialVelocityY={2}
+                            gravity={0.2}
+                            onConfettiComplete={(confetti) => {
+                                confetti?.reset()
+                            }}
+                            colors={['#EB82C9', '#FFB98E', '#483887']}
+                        />
+                    </>
+                )}
+
+                {isFlipped && !cardsSameValue && (
+                    <Popup
+                        active={isFlipped && !cardsSameValue}
+                        domNode={document.body}
+                    >
+                        <div className='flex flex-col gap-2 justify-center items-center pop-in'>
+                            <p className='text-5xl'>Let&apos;s Talk...</p>
+                            <span className='text-[150px] rotate-12'>🤔</span>
+                        </div>
+                    </Popup>
+                )}
+
                 <Settings
                     currentUser={currentUser}
                     showModalChangeName={showModalChangeName}
                     setShowModalChangeName={setShowModalChangeName}
                     handleChangeName={handleChangeName}
                 />
+
                 {!currentUser && (
                     <div className='flex flex-col m-auto gap-4'>
                         <div>Saisissez votre nom d&apos;utilisateur</div>

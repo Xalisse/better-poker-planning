@@ -19,7 +19,7 @@ const Settings = ({
     return (
         <>
             {currentUser && (
-                <div className='fixed top-0 right-0 flex flex-col gap-4 justify-start items-end w-64 h-40 py-4 px-6 rounded-bl-full bg-dark-secondary z-10'>
+                <div className='fixed top-0 right-0 flex flex-col gap-4 justify-start items-end w-64 h-40 py-4 px-6 rounded-bl-full bg-dark-secondary'>
                     <FiSettings className='text-dark-secondary text-8xl absolute bottom-[-25px] left-[25px]' />
                     <a
                         className='flex flex-row justify-right items-center gap-2 cursor-pointer text-white'
