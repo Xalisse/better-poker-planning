@@ -127,18 +127,35 @@ const ImportCsv = ({ onClose, idRoom }: Props) => {
 
             {previewData && (
                 <div className='text-left overflow-auto'>
-                    {previewData.map((story) => (
-                        <li key={story.id}>
-                            {story.id}
-                            {' - '}
-                            {story.title}
-                            <span className='text-sm text-primary ml-2'>
-                                {story.estimation
-                                    ? `${story.estimation} points`
-                                    : 'Non estimée'}
-                            </span>
-                        </li>
-                    ))}
+                    <table className='border-separate border-spacing-x-4 border-spacing-y-2 table-fixed w-full'>
+                        <colgroup>
+                            <col className='w-[8%] min-w-[42px]' />
+                            <col />
+                            <col className='w-[11%] min-w-[100px]' />
+                        </colgroup>
+                        <thead>
+                            <tr className='uppercase text-xs'>
+                                <th>id</th>
+                                <th>title</th>
+                                <th>estimation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {previewData.map((story) => (
+                                <tr key={story.id}>
+                                    <td>{story.id}</td>
+                                    <td className='overflow-hidden whitespace-nowrap text-ellipsis w-1'>
+                                        {story.title}
+                                    </td>
+                                    <td className='text-sm text-primary ml-2'>
+                                        {story.estimation
+                                            ? `${story.estimation} points`
+                                            : 'Non estimée'}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             )}
 
