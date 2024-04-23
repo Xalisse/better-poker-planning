@@ -88,7 +88,7 @@ const ImportCsv = ({ onClose, idRoom }: Props) => {
     }
 
     return (
-        <div className='flex flex-col h-full justify-between p-4'>
+        <div className='grid grid-rows-[1fr,auto,1fr] gap-8 h-full justify-between p-4'>
             <div>
                 <p className='text-lg font-bold'>Import de stories</p>
                 <p className='text-tertiary'>
@@ -97,7 +97,7 @@ const ImportCsv = ({ onClose, idRoom }: Props) => {
                 </p>
 
                 <div
-                    className='flex justify-center mt-8'
+                    className='flex justify-center mt-4'
                     style={{ alignItems: 'stretch' }}
                 >
                     <input
@@ -118,13 +118,15 @@ const ImportCsv = ({ onClose, idRoom }: Props) => {
                         Prévisualiser
                     </button>
                 </div>
+                {error && <p>{error}</p>}
+                {warning?.map((err) => (
+                    <p key={err}>{err}</p>
+                ))}
+                {loading && <p>Chargement...</p>}
             </div>
-            {error && <p>{error}</p>}
-            {warning && warning.map((err) => <p key={err}>{err}</p>)}
-            {loading && <p>Chargement...</p>}
 
             {previewData && (
-                <div className='text-left'>
+                <div className='text-left overflow-auto'>
                     {previewData.map((story) => (
                         <li key={story.id}>
                             {story.id}
