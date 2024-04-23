@@ -5,6 +5,7 @@ import { getFirestore, setDoc, doc } from 'firebase/firestore'
 import Papa from 'papaparse'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { Tooltip } from 'react-tooltip'
 
 interface Props {
     idRoom: string
@@ -144,8 +145,17 @@ const ImportCsv = ({ onClose, idRoom }: Props) => {
                             {previewData.map((story) => (
                                 <tr key={story.id}>
                                     <td>{story.id}</td>
-                                    <td className='overflow-hidden whitespace-nowrap text-ellipsis w-1'>
+                                    <td
+                                        className='overflow-hidden whitespace-nowrap text-ellipsis w-1'
+                                        data-tooltip-id={story.id}
+                                        data-tooltip-delay-show={200}
+                                    >
                                         {story.title}
+                                        <Tooltip id={story.id}>
+                                            <div className='max-w-xs h-auto break-normal text-wrap'>
+                                                {story.title}
+                                            </div>
+                                        </Tooltip>
                                     </td>
                                     <td className='text-sm text-primary ml-2'>
                                         {story.estimation

@@ -100,14 +100,12 @@ const ListStories = ({ idRoom, selectStory, selectedStoryId }: Props) => {
             </button>
             {showModalCreateStory &&
                 createPortal(
-                    <>
-                        <AddStoryModal
-                            handleSubmit={handleSubmit}
-                            handleChange={handleChange}
-                            error={error}
-                            onClose={() => setShowModalCreateStory(false)}
-                        />
-                    </>,
+                    <AddStoryModal
+                        handleSubmit={handleSubmit}
+                        handleChange={handleChange}
+                        error={error}
+                        onClose={() => setShowModalCreateStory(false)}
+                    />,
                     document.body
                 )}
             {showModalImportStories &&

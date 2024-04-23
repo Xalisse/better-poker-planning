@@ -11,6 +11,10 @@ body {
     height: 100%;
 }
 
+.text-wrap {
+    text-wrap: wrap;
+}
+
 @layer base {
     body {
         @apply bg-extra-light-secondary text-extra-dark-tertiary;
