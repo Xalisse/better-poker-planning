@@ -25,7 +25,13 @@ const average = (cards: { user: User; cardValue: CardValueType }[]) => {
         (c) => typeof c.cardValue === 'number' && !c.user.isSpectator
     ).length
 
-    return total / voting
+    console.log(
+        '🌿 ~ average ~ Math.floor(total / voting):',
+        Math.floor(total / voting)
+    )
+    console.log('🌿 ~ average ~ voting:', voting)
+    console.log('🌿 ~ average ~ total:', total)
+    return Math.floor(total / voting)
 }
 
 const PokerTable = ({
