@@ -37,19 +37,23 @@ const PlayerHand = ({
     }, [currentUser.isSpectator])
 
     return (
-        <div className='fixed bottom-10 left-0 flex flex-row gap-4 p-4'>
-            <button
-                className='w-auto px-4 rounded-full flex justify-center items-center cursor-pointer gap-2'
-                onClick={handleSpectateMode}
-                disabled={isFlipped}
-            >
-                {currentUser.isSpectator ? (
-                    <GiTabletopPlayers className='text-5xl' />
-                ) : (
-                    <IoEyeSharp className='text-5xl' />
-                )}
-                <span>{currentUser.isSpectator ? 'Jouer' : 'Regarder'}</span>
-            </button>
+        <>
+            <div className='fixed bottom-10 left-0 flex flex-row gap-4 p-4'>
+                <button
+                    className='w-auto px-4 rounded-full flex justify-center items-center cursor-pointer gap-2'
+                    onClick={handleSpectateMode}
+                    disabled={isFlipped}
+                >
+                    {currentUser.isSpectator ? (
+                        <GiTabletopPlayers className='text-5xl' />
+                    ) : (
+                        <IoEyeSharp className='text-5xl' />
+                    )}
+                    <span>
+                        {currentUser.isSpectator ? 'Jouer' : 'Regarder'}
+                    </span>
+                </button>
+            </div>
             {!hideCards && (
                 <div
                     className={`fixed bottom-10 left-[15%] w-[70%] flex flex-row justify-center show-cards ${
@@ -70,7 +74,7 @@ const PlayerHand = ({
                     )}
                 </div>
             )}
-        </div>
+        </>
     )
 }
 

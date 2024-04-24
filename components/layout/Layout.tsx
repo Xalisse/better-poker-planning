@@ -17,7 +17,7 @@ const Layout = ({ className, children }: Props) => {
 
     return (
         <div className={className}>
-            <header className='p-2 w-full flex flex-row items-center justify-between'>
+            <header className='p-2 w-full items-center justify-between'>
                 <div className='flex flex-row items-center'>
                     <div className='flex flex-row gap-4 items-center'>
                         <Link href='/'>
@@ -33,19 +33,18 @@ const Layout = ({ className, children }: Props) => {
                     </div>
                     <h1>{router.query.routeName}</h1>
                 </div>
+                <div className='flex flex-row'>
+                    <a
+                        href='https://github.com/Xalisse/better-poker-planning'
+                        className='!cursor-pointer px-2'
+                    >
+                        Github
+                    </a>
+                </div>
             </header>
             <main className={`${comfortaa.className} w-full flex-1`}>
                 {children}
             </main>
-            <footer className='fixed w-full bg-extra-light-secondary border-t bottom-0 right-0 flex flex-row justify-center items-center h-[40px]'>
-                Made with 💖 by{' '}
-                <a
-                    href='https://github.com/Xalisse'
-                    className='!cursor-pointer px-2'
-                >
-                    Valentine
-                </a>
-            </footer>
         </div>
     )
 }
