@@ -25,12 +25,6 @@ const average = (cards: { user: User; cardValue: CardValueType }[]) => {
         (c) => typeof c.cardValue === 'number' && !c.user.isSpectator
     ).length
 
-    console.log(
-        '🌿 ~ average ~ Math.floor(total / voting):',
-        Math.floor(total / voting)
-    )
-    console.log('🌿 ~ average ~ voting:', voting)
-    console.log('🌿 ~ average ~ total:', total)
     return Math.floor(total / voting)
 }
 
@@ -43,10 +37,6 @@ const PokerTable = ({
     connectedUsers,
     isFlipped,
 }: Props) => {
-    useEffect(() => {
-        console.log('PLAYER CARDS', playerCards)
-    })
-
     const northUser: { user: User; cardValue: CardValueType }[] = []
     const eastUser: { user: User; cardValue: CardValueType }[] = []
     const westUser: { user: User; cardValue: CardValueType }[] = []
@@ -101,7 +91,7 @@ const PokerTable = ({
 
     return (
         <div className='grid grid-cols-[1fr,3fr,1fr] grid-rows-[2fr,3fr,2fr] w-2/3 self-center py-10 gap-4 mt-10'>
-            <div className='grid grid-rows-3 bg-light-secondary w-full h-full m-auto items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
+            <div className='grid grid-rows-[auto,1fr,1fr] p-4 bg-light-secondary w-full h-full m-auto items-center justify-center rounded-xl col-span-1 col-start-2 row-span-1 row-start-2'>
                 {selectedStoryTitle && <div>{selectedStoryTitle}</div>}
                 <button
                     onClick={handleFlipCards}
@@ -111,7 +101,7 @@ const PokerTable = ({
                 </button>
                 {isFlipped && selectedStoryId && (
                     <form
-                        className='row-start-3'
+                        className='row-start-3 flex items-center gap-4 justify-center'
                         onSubmit={handleSaveEstimation}
                     >
                         Estimation :{' '}
@@ -119,8 +109,9 @@ const PokerTable = ({
                             name='value'
                             onChange={handleChangeEstimation}
                             value={valuesEstimation.value}
+                            className='w-16'
                         />
-                        <button className='primary m-2' type='submit'>
+                        <button className='primary' type='submit'>
                             Sauvegarder
                         </button>
                     </form>
