@@ -14,6 +14,7 @@ import AddStoryModal from './AddStoryModal'
 import ModalLayout from './ModalLayout'
 import ImportCsv from './ImportCsv'
 import Story from '@/models/story.model'
+import UserStoriesTable from './UserStoriesTable'
 
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
@@ -25,7 +26,7 @@ interface Props {
 }
 
 const ListStories = ({ idRoom, selectStory, selectedStoryId }: Props) => {
-    const [stories, setStories] = useState<DocumentData[]>([])
+    const [stories, setStories] = useState<Story[]>([])
     const [error, setError] = useState<string>()
     const [showModalCreateStory, setShowModalCreateStory] =
         useState<boolean>(false)
@@ -61,43 +62,32 @@ const ListStories = ({ idRoom, selectStory, selectedStoryId }: Props) => {
                 ...doc.data(),
                 id: doc.id,
             }))
-            setStories(storiesList)
+            setStories(storiesList as Story[])
         })
         return () => unsub()
     }, [idRoom])
 
     return (
         <>
-            <div>
-                {stories.map((story) => (
-                    <li
-                        key={story.id}
-                        className={`hover:font-bold hover:cursor-pointer ${
-                            story.id === selectedStoryId && 'font-bold'
-                        }`}
-                        onClick={() => selectStory(story.id)}
-                    >
-                        {story.title}{' '}
-                        <span className='text-sm text-dark-primary'>
-                            {story.estimation
-                                ? `${story.estimation} points`
-                                : 'Non estimée'}
-                        </span>
-                    </li>
-                ))}
+            <UserStoriesTable
+                userStories={stories}
+                onStoryClick={selectStory}
+                selectedStoryId={selectedStoryId}
+            />
+            <div className='flex gap-4 mt-4'>
+                <button
+                    className='primary'
+                    onClick={() => setShowModalCreateStory(true)}
+                >
+                    Créer une story
+                </button>
+                <button
+                    className='primary'
+                    onClick={() => setShowModalImportStories(true)}
+                >
+                    Importer des stories
+                </button>
             </div>
-            <button
-                className='primary'
-                onClick={() => setShowModalCreateStory(true)}
-            >
-                Créer une story
-            </button>
-            <button
-                className='primary'
-                onClick={() => setShowModalImportStories(true)}
-            >
-                Importer des stories
-            </button>
             {showModalCreateStory &&
                 createPortal(
                     <AddStoryModal

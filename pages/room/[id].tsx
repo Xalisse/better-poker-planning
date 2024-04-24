@@ -432,12 +432,12 @@ export default function Room() {
                     <>
                         <button
                             onClick={() => setShowUS(false)}
-                            className='absolute right-[33%] top-[50%] rounded-r-none text-dark-tertiary !bg-white border-2 border-r-0 border-dark-tertiary'
+                            className='absolute right-[40%] top-[50%] rounded-r-none text-dark-tertiary !bg-white border-[1px] border-r-0 border-l-dark-tertiary'
                         >
                             {' >'}
                         </button>
-                        <div className='absolute right-0 top-[15%] h-[70%] w-1/3 z-20'>
-                            <div className='rounded-l-xl bg-white border-2 border-r-0 border-dark-tertiary h-full p-5 text-left overflow-auto flex flex-col justify-between'>
+                        <div className='absolute right-0 top-0 h-full w-[40%] z-20'>
+                            <div className='bg-white border-l-[1px] border-r-0 border-l-dark-tertiary h-full p-5 text-left overflow-auto flex flex-col gap-16'>
                                 {selectedStoryId && (
                                     <div>
                                         <p className='text-lg italic'>
