@@ -1,7 +1,6 @@
 import { CardValueType } from '@/models/card.model'
 import User from '@/models/user.model'
 import { useFormik } from 'formik'
-import { useEffect } from 'react'
 import UserCard from './UserCard'
 
 interface Props {

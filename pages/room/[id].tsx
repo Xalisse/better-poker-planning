@@ -74,12 +74,6 @@ export default function Room() {
     }
 
     const handleFlipCards = () => {
-        if (isFlipped) {
-            setCardsSameValue(false)
-        } else {
-            setCardsSameValue(areCardsValueEqual(cards))
-        }
-
         setIsFlipped(!isFlipped)
         postFlipCards(!isFlipped, idRoom)
     }
@@ -173,6 +167,14 @@ export default function Room() {
     useEffect(() => {
         cards && localStorage.setItem('cards', JSON.stringify(cards))
     }, [cards])
+
+    useEffect(() => {
+        if (!isFlipped) {
+            setCardsSameValue(false)
+        } else {
+            setCardsSameValue(areCardsValueEqual(cards))
+        }
+    }, [isFlipped, cards])
 
     useEffect(() => {
         localStorage.setItem('isFlipped', JSON.stringify(isFlipped))
