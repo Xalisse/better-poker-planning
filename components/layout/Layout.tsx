@@ -1,5 +1,5 @@
 import { ReactElement } from 'react'
-import { Comfortaa } from '@next/font/google'
+import { Comfortaa } from 'next/font/google'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 const comfortaa = Comfortaa({

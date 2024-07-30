@@ -1,6 +1,6 @@
 import 'tailwindcss/tailwind.css'
 import '../styles/globals.css'
-import { Comfortaa } from '@next/font/google'
+import { Comfortaa } from 'next/font/google'
 import { Toaster } from 'sonner'
 import Layout from '@/components/layout/Layout'
 
